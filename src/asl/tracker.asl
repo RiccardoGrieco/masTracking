@@ -3,9 +3,7 @@
 /* Initial beliefs*/
 
 auctionNumber(1).
-numberOfAgents(2).
-
-canSee(1,1,5,5).
+numberOfAgents(3).
 
 /* RULES */
 
@@ -22,33 +20,35 @@ amInterested(X,Y) :-
 
 /* Auctioneer */
 
-+losingTarget(X, Y) : true
-            <- .print("I'm losing my target, let's start an auction!");
-                auctionNumber(N);
-               .broadcast(achieve, cfp(N, X, Y));
-                -auctionNumber(N);
-                +auctionNumber(N+1).
++losingTarget(X, Y) : auctionNumber(N)
+    <-  .print("I'm losing my target (",X,",",Y,"), let's start an auction! ID=",N);
+        .broadcast(achieve, cfp(N, X, Y));
+        -auctionNumber(N);
+        +auctionNumber(N+1).
 
 +partecipate(N,V)[source(S)] 
-        :   .findall(Ag, partecipate(N,P)[source(Ag)], ListOfAnswerer) &
-            numberOfAgents(NumberOfAgents) &
-            .length(ListOfAnswerer,NumberOfAgents)
-        <-  .findall(Partecipant, partecipate(N,true)[source(Partecipant)], ListOfPartecipants);
-            .length(ListOfPartecipants, NumberOfPartecipants);
-            +numberOfPartecipants(N, NumberOfPartecipants);
-            target(X, Y);
-            .send(ListOfPartecipants, achieve, placeBid(N, X, Y)).
+    :   .print(S," wants to partecipate to the auction ", N, " ? ", V) &
+        .findall(Ag, partecipate(N,P)[source(Ag)], ListOfAnswerer) &
+        numberOfAgents(NumberOfAgents) &
+        .length(ListOfAnswerer,NumberOfAgents) &
+        target(X,Y) 
+    <-  .findall(Partecipant, partecipate(N,true)[source(Partecipant)], ListOfPartecipants);
+        .length(ListOfPartecipants, NumberOfPartecipants);
+        +numberOfPartecipants(N, NumberOfPartecipants);
+        .print("Partecipants individuated, let's get their bid");
+        .send(ListOfPartecipants, achieve, placeBid(N, X, Y)).
 
 +bid(N,V)[source(S)]
-    :   .findall(bid(B, Ag), bid(N,B)[source(Ag)], ListOfBids) &
+    :   .print(S, "'s bid for auction ", N, " is: ", V) &
+        .findall(bid(B, Ag), bid(N,B)[source(Ag)], ListOfBids) &
         numberOfPartecipants(N, NumberOfPartecipants) &
-        .length(ListOfBids, NumberOfPartecipants)
+        .length(ListOfBids, NumberOfPartecipants) &
+        target(X,Y)
     <-  .max(ListOfBids, bid(B, Winner));
-        .print("The winner is ", Winner, " with a bid of ", B);
-        target(X,Y);
-        //TODO 
+        .print("The winner of auction ", N, " is ", Winner, " with a bid of ", B);
+        //TODO get confirm
         .send(Winner, tell, winner(N, X, Y));
-        //TODO
+        //TODO get confirm!
         -target(X,Y).
 
 /* Bidder */
@@ -59,11 +59,10 @@ amInterested(X,Y) :-
 +!placeBid(N, X, Y)[source(S)] : true
     <-  //TODO .calculateBid(X, Y, B)
         .random(B);
-        .print("My bet: ", B);
+        .print("My bid for auction ",N," is: ", B);
         .send(S, tell, bid(N,B)).
 
-+winner(N, X, Y) : true <- target(X, Y). //TODO confirm
-
++winner(N, X, Y) : true <- +target(X, Y). //TODO confirm
 
 //TODO
 //+sprayed[source(Strunz)] : hasWeapon <- .kill(S);
