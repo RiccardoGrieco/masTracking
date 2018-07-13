@@ -1,0 +1,30 @@
+{
+  "rooms":[
+    {
+      "topLeftX": "1",
+      "topLeftY":"1",
+      "width":"9",
+      "height":"9"
+    },
+    {
+      "topLeftX": "11",
+      "topLeftY":"1",
+      "width":"9",
+      "height":"9"
+    },
+
+    {
+      "topLeftX": "1",
+      "topLeftY":"11",
+      "width":"9",
+      "height":"9"
+    }, {
+      "topLeftX": "11",
+      "topLeftY":"11",
+      "width":"9",
+      "height":"9"
+    }
+
+
+  ]
+}
