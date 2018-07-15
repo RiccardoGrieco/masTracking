@@ -4,7 +4,7 @@
 
 //TODO these should be perceived from environment or set on agent creation
 auctionNumber(1).
-numberOfAgents(2).
+numberOfAgents(3).
 
 /* RULES */
 
@@ -13,6 +13,7 @@ numberOfAgents(2).
 amInterested(X,Y) :- 
     canSee(X1, Y1, X2, Y2) &
     X>=X1 & X<=X2 & Y>=Y1 & Y<=Y2.
+
 
 /* Initial goals */
 
@@ -27,15 +28,16 @@ amInterested(X,Y) :-
         //!auction(Ag, Tid, X,Y, <parameters that indicates the chain of auctions>)
 
 +partecipate(Ag, Tid, V)[source(S)] 
-    :   //.print(S," wants to partecipate to the auction for ", Ag,"-",Tid, " ? ", V) &
+    :   .print(S," wants to partecipate to the auction for ", Ag,"-",Tid, " ? ", V) &
         .findall(PAg, partecipate(Ag, Tid, _)[source(PAg)], ListOfAnswerer) &
         numberOfAgents(NumberOfAgents) &
         .length(ListOfAnswerer,NumberOfAgents) &
+        //TODO tracking(Ag, Tid, X,Y) &
         tracking(Ag, Tid, X, Y)
     <-  .findall(Partecipant, partecipate(Ag, Tid ,true)[source(Partecipant)], ListOfPartecipants);
         .length(ListOfPartecipants, NumberOfPartecipants);
         +numberOfPartecipants(Ag, Tid, NumberOfPartecipants);
-        //.print("Partecipants individuated, let's get their bid");
+        .print("Partecipants individuated, let's get their bid");
         -partecipate(Ag, Tid, _);
         .send(ListOfPartecipants, achieve, placeBid(Ag, Tid, X, Y)).
 
@@ -58,31 +60,14 @@ amInterested(X,Y) :-
         //TODO get confirm!
         .
 
-// winner of the auction confirm his win
-
-// the auctioneer is the winner of a pending auction
-+!confirm(Ag, Tid, Confirmation) 
-    :   Confirmation=true &
-        not winner(_,_,_,_)
-        & .print("Auction for ",Ag,"-",Tid," has ended") //TODO remove this
-    <-  !clearAuction(Ag, Tid);
++!confirm(Ag, Tid, Confirmation) : Confirmation=true & .print("Auction has ended") //TODO remove this
+    <-  //clear belief base regarding the auction)
+        !clearAuction(Ag, Tid);
         -tracking(Ag,Tid,_,_).
 
 
-// if the auctioneer is the winner of a pending auction
-+!confirm(Ag, Tid, Confirmation) 
-    :   Confirmation=true &
-        winner(PrevAg, PrevTid, X ,Y)[source(S)]
-        & .print("Auction for ",Ag,"-",Tid," has ended")
-    <-  +tracking(PrevAg, PrevTid, X, Y);
-        .send(S, achieve, confirm(PrevAg, PrevTid, true));
-        !clearAuction(Ag,Tid);
-        -tracking(Ag, Tid, _,_).
-
-
 //TODO what if the winner does not confirm?
-// The 2 goals below are a proposal for an implementation where
-// if a winner refuses, the winner is the second best bidder, and so on.
+
 +!confirm(Ag, Tid, Confirmation) 
     :   Confirmation=false & .count(bid(Ag,Tid,_),1) //no one left
     <-  !clearAuction(Ag,Tid)
@@ -95,7 +80,7 @@ amInterested(X,Y) :-
         !findWinner(Ag, Tid).
 
 
-// clears the beliefs for an auction
+// clear beliefs for the auction
 +!clearAuction(Ag, Tid)
     <-  .abolish(bid(Ag,Tid,_));
         .abolish(numberOfPartecipants(Ag, Tid,_));
@@ -110,8 +95,8 @@ amInterested(X,Y) :-
 +!cfp(Ag, Tid, X, Y)[source(S)] : not amInterested(X, Y) <- .send(S, tell, partecipate(Ag, Tid,false)).
 
 +!placeBid(Ag, Tid, X, Y)[source(S)] : true
-    <-  //auction.calculateBid(X, Y, B)
-        .random(B); //TODO remove
+    <-  //TODO .calculateBid(X, Y, B)
+        .random(B); //TODO remove this line
         .print("My bid for auction ",Ag,"-",Tid," is: ", B);
         .send(S, tell, bid(Ag, Tid,B)).
 
@@ -122,17 +107,14 @@ amInterested(X,Y) :-
         +tracking(Ag, Tid, X, Y).
 
 
-//TODO what to do when already tracking someone and i'm the winner?
+//TODO what to do??
 +winner(Ag, Tid, X, Y)[source(S)]
-    :   tracking(TrackedAg,TrackedTid, TrackedX, TrackedY) & 
-        not auctionOngoing(TrackedAg,TrackedTid)
-    <-  .print("I'm the winner but i'm tracking someone. I'll start the auction for ",TrackedAg,"-", TrackedTid);
-        .broadcast(achieve, cfp(TrackedAg, TrackedTid, TrackedX, TrackedY));
-        +auctionOngoing(TrackedAg,TrackedTid).
+    :   tracking(TrackedAg,TrackedTid, _, _) & not auctionOngoing(TrackedAg,TrackedTid)
+    <-  .broadcast(achieve, cfp(TrackedAg, TrackedTid, X, Y));
+        +auctionOngoing(Ag,Tid).
 
+/*  */
 
-/*  Target Appears */
-//TODO implement
 +target(X,Y)[source(S)]
     : S\==self & tracking(Ag,Tid,X,Y)
     <-  .send(S, tell, tracking(Ag,Tid,X,Y)).

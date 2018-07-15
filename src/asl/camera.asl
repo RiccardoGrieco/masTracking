@@ -2,7 +2,8 @@
 
 { include ("tracker.asl")}
 
-canSee(1,1,5,5).
+//TODO this should be set at instantiation
+canSee(4,4,9,9).
 
 /* Initial beliefs and rules */
 

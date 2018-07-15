@@ -4,7 +4,6 @@
 {include("tracker.asl")}
 
 //target(3,3).
+canSee(2,2,7,7).
 
-tracking('auctioneer', 1, 3, 3).
-
-losingTarget('auctioneer',1,3,3).
+tracking('auctioneer2', 1, 5, 5).
