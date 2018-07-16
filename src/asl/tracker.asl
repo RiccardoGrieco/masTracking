@@ -77,6 +77,7 @@ amInterested(X,Y) :-
     <-  +tracking(PrevAg, PrevTid, X, Y);
         .send(S, achieve, confirm(PrevAg, PrevTid, true));
         !clearAuction(Ag,Tid);
+        -winner(PrevAg,PrevTid,_,_);
         -tracking(Ag, Tid, _,_).
 
 
