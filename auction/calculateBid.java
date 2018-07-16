@@ -34,7 +34,7 @@ public class calculateBid extends DefaultInternalAction {
         Iterator<Literal> itLiteral = null;
 
         // retrieves agent's no. neightbors
-        itLiteral = agentBB.getCandidateBeliefs(new PredicateIndicator("noNeightbors", 1));
+        itLiteral = agentBB.getCandidateBeliefs(new PredicateIndicator("noNeighbors", 1));
         tmpLiteral = itLiteral.next();
         //tmpLiteral = agentBB.contains(Literal.parseLiteral("noNeightbors(1)"));
         try {
@@ -48,7 +48,7 @@ public class calculateBid extends DefaultInternalAction {
         // retrieves agent's coordinates
         itLiteral = agentBB.getCandidateBeliefs(new PredicateIndicator("myPosition", 2));
         tmpLiteral = itLiteral.next();
-        //tmpLiteral = agentBB.contains(Literal.parseLiteral("position(X, Y)"));
+        //tmpLiteral = agentBB.contains(Literal.parseLiteral("myPosition(X, Y)"));
         try {
             agentXCoord = Double.valueOf(tmpLiteral.getTermsArray()[0].toString());
             agentYCoord = Double.valueOf(tmpLiteral.getTermsArray()[1].toString());
@@ -78,16 +78,16 @@ public class calculateBid extends DefaultInternalAction {
                 else {
 
                     // retrieves actual target's coords
-                    itLiteral = agentBB.getCandidateBeliefs(new PredicateIndicator("myTargetPosition", 2));
+                    itLiteral = agentBB.getCandidateBeliefs(new PredicateIndicator("tracking", 4));
                     tmpLiteral = itLiteral.next();
-                    //tmpLiteral = agentBB.contains(Literal.parseLiteral("target(X, Y)"));
+                    //tmpLiteral = agentBB.contains(Literal.parseLiteral("tracking(X, Y)"));
                     try {
-                        trackedXCoord = Double.valueOf(tmpLiteral.getTermsArray()[0].toString());
-                        trackedYCoord = Double.valueOf(tmpLiteral.getTermsArray()[1].toString());
+                        trackedXCoord = Double.valueOf(tmpLiteral.getTermsArray()[2].toString());
+                        trackedYCoord = Double.valueOf(tmpLiteral.getTermsArray()[3].toString());
                     }
                     catch(ArrayIndexOutOfBoundsException e) {
                         throw new Exception("ERROR in internal action 'calculateBid': " 
-                            + "agent '" + agent + "' has literal 'target' in BB with less than 2 arguments!");
+                            + "agent '" + agent + "' has literal 'tracking' in BB with less than 4 arguments!");
                     }
 
                     dist = euclideanDistance(agentXCoord, agentYCoord, trackedXCoord, trackedYCoord);
