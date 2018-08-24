@@ -2,7 +2,7 @@ MAS masTracking {
     infrastructure: Centralised
     environment: HouseEnv(gui,level.txt,rooms.json) // use "nogui" as parameter to not show the GUI
     agents:
-        camera;
+        camera#16;
         auctioneer;
         auctioneer2;
     aslSourcePath:

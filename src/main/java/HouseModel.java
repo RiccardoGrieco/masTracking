@@ -17,6 +17,8 @@ import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.DefaultUndirectedGraph;
 import org.json.JSONArray;
 import org.json.JSONObject;
+
+import jason.asSemantics.Agent;
 import jason.environment.grid.GridWorldModel;
 import jason.environment.grid.Location;
 
@@ -37,6 +39,11 @@ public class HouseModel extends GridWorldModel{
 
     //Target List useful for the environment
     private final List<Target> targets=new ArrayList<>();
+    
+    //TODO cambiare se vogliamo implementare una nuova classe agente: a noi servono solo le posizioni!
+    private final List<Agent> cameraAgents = new ArrayList<>();
+
+    //private final List<Agent> mobileAgents = new ArrayList<>();
 
     public void addTarget(Target target){
         targets.add(target);
@@ -44,6 +51,14 @@ public class HouseModel extends GridWorldModel{
 
     public List<Target> getTargets() {
         return targets;
+    }
+
+    public void addCameraAgent(Agent agent) {
+        cameraAgents.add(agent);
+    }
+
+    public List<Agent> getCameraAgents() {
+        return cameraAgents;
     }
 
     //Rooms array

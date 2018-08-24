@@ -78,6 +78,8 @@ public final class HouseView extends GridWorldView{
     public void drawAgent(Graphics g, int x, int y, Color c, int id) {
         super.drawAgent(g, x, y, c, id);
         //TODO
+        // draw camera agents (fixed position)
+        // draw mobile agent (?)(variable position)
     }
 
     @Override
