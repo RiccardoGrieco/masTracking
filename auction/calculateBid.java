@@ -17,7 +17,6 @@ public class calculateBid extends DefaultInternalAction {
 
     @Override
     public Object execute(TransitionSystem ts, Unifier un, Term[] args) throws Exception {
-
         Agent agent = ts.getAg();
         BeliefBase agentBB = agent.getBB();
         Literal tmpLiteral = agentBB.contains(Literal.parseLiteral("isFree"));

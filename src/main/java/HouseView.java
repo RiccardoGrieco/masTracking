@@ -15,8 +15,9 @@ import jason.environment.grid.GridWorldView;
 
 public final class HouseView extends GridWorldView{
 
-    //Customized white color
+    //Custom colors
     private static final Color MY_WHITE=new Color(238,238,238);
+    private static final Color MY_YELLOW=new Color(255, 255, 0, 70);
 
     //Our model useful to update the canvas when new object are added
     private final HouseModel model;
@@ -71,8 +72,29 @@ public final class HouseView extends GridWorldView{
         switch(object){
             case Target.TARGET:
             drawTarget(g, x, y);
+            break;
+
+            case AgentModel.CameraAgent.CAMERA:
+            drawCamera(g,x,y);
+            break;
+
+            case AgentModel.YellowBox.YELLOW_BOX:
+            drawYellowBox(g, x, y);
+            break;
         }
     }
+
+    public void drawYellowBox(Graphics g, int x, int y) {
+        g.setColor(MY_YELLOW);
+        g.fillRect(x * cellSizeW + 1, y * cellSizeH+1, cellSizeW-1, cellSizeH-1);
+
+    }
+
+     public void drawCamera(Graphics g, int x, int y ){
+        g.drawImage(TEXTURE_LIBRARY.get(CAMERA), x * cellSizeW+1, y*cellSizeH+1, cellSizeW-1, cellSizeH-1,null);
+        g.setColor(MY_YELLOW);
+        g.fillRect(x * cellSizeW + 1, y * cellSizeH+1, cellSizeW-1, cellSizeH-1);
+     }
 
     
     @Override
@@ -93,12 +115,12 @@ public final class HouseView extends GridWorldView{
 
     }
 
-    //Customm drawEmpty in order to avoid to repaint all the canvas
+    //Custom drawEmpty in order to avoid to repaint all the canvas
     @Override
     public void drawEmpty(Graphics g, int x, int y) {
-        g.setColor(MY_WHITE);
-        g.fillRect(x * cellSizeW + 1, y * cellSizeH+1, cellSizeW-1, cellSizeH-1);
-        g.setColor(Color.LIGHT_GRAY);
-        g.drawRect(x * cellSizeW, y * cellSizeH, cellSizeW, cellSizeH);
+            g.setColor(MY_WHITE);
+            g.fillRect(x * cellSizeW + 1, y * cellSizeH+1, cellSizeW-1, cellSizeH-1);
+            g.setColor(Color.LIGHT_GRAY);
+            g.drawRect(x * cellSizeW, y * cellSizeH, cellSizeW, cellSizeH);
     }
 }

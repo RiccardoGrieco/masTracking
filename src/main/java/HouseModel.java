@@ -8,7 +8,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.LinkedList;
+import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.jgrapht.GraphPath;
@@ -18,7 +21,6 @@ import org.jgrapht.graph.DefaultUndirectedGraph;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import jason.asSemantics.Agent;
 import jason.environment.grid.GridWorldModel;
 import jason.environment.grid.Location;
 
@@ -40,10 +42,23 @@ public class HouseModel extends GridWorldModel{
     //Target List useful for the environment
     private final List<Target> targets=new ArrayList<>();
     
-    //TODO cambiare se vogliamo implementare una nuova classe agente: a noi servono solo le posizioni!
-    private final List<Agent> cameraAgents = new ArrayList<>();
+    private List<AgentModel> cameraAgents = new ArrayList<>();
+    
+    //private final List<AgentModel> movingAgents = new ArrayList<>();
 
-    //private final List<Agent> mobileAgents = new ArrayList<>();
+    private Map<AgentModel, Target> agentsTrackingMap;  // has info about agents and their tracking
+
+    //private Map<MovingAgent, Target> movingTargetTrackingMap;
+
+    //Lo conservo non si può mai sapere
+    private final List<AgentModel.YellowBox> yellowBoxes=new LinkedList<>();
+
+    /**
+     * @return the yellowBoxes
+     */
+    public List<AgentModel.YellowBox> getYellowBoxes() {
+        return yellowBoxes;
+    }
 
     public void addTarget(Target target){
         targets.add(target);
@@ -53,11 +68,11 @@ public class HouseModel extends GridWorldModel{
         return targets;
     }
 
-    public void addCameraAgent(Agent agent) {
+    public void addCameraAgent(AgentModel agent) {
         cameraAgents.add(agent);
     }
 
-    public List<Agent> getCameraAgents() {
+    public List<AgentModel> getCameraAgents() {
         return cameraAgents;
     }
 
@@ -68,8 +83,14 @@ public class HouseModel extends GridWorldModel{
         return rooms;
     }
 
-    public HouseModel(int nAgents, String level, String rooms){
-        super(WIDTH,HEIGHT,nAgents);
+    public HouseModel(List<AgentModel> agents, String level, String rooms){
+        super(WIDTH, HEIGHT, agents.size());
+
+        agentsTrackingMap  = new HashMap<>();
+        //movingTargetTrackingMap  = new HashMap<>();
+
+        cameraAgents = agents;
+        registerCamera();
 
         //Parsing char matrix from level description
         char[][] walls=new char[HEIGHT][];
@@ -86,6 +107,9 @@ public class HouseModel extends GridWorldModel{
 
         //Set reference to this model in all targets
         Target.setModel(this);
+
+        //Set reference to this model in all agents
+        AgentModel.setModel(this);
 
         //Start Target Spawner Thread
         spawnerTargetThread();
@@ -231,5 +255,40 @@ public class HouseModel extends GridWorldModel{
             }
         });
         thread.start();
+    }
+
+    private void registerCamera(){
+        for (AgentModel agent : cameraAgents) {
+            add(AgentModel.CameraAgent.CAMERA, agent.getPosition());
+            initYellowBoxes(agent);
+            
+        }
+
+        for (AgentModel.YellowBox box : yellowBoxes) {
+            add(AgentModel.YellowBox.YELLOW_BOX, box.getPosition().x, box.getPosition().y);
+        }
+    }
+
+    private void initYellowBoxes(AgentModel agent){
+        Rectangle viewZone=agent.getViewZone();
+        Location position=agent.getPosition();
+        for (int i = (int)viewZone.getMinX(); i < (int)viewZone.getMaxX(); i++) {
+            for (int j = (int)viewZone.getMinY(); j < (int)viewZone.getMaxY(); j++){
+                if (i!=position.x || j!=position.y)
+                    yellowBoxes.add(new AgentModel.YellowBox(i,j));
+            }
+        }
+    }
+
+    /**
+     * Return true if and only if 'agent' is tracking 'target'.
+     */
+    public boolean isAlreadyTracking(AgentModel agent, Target target) {
+
+        if(agentsTrackingMap.get(agent) == null) return false;  // is tracking no one
+        
+        if(agentsTrackingMap.get(agent).getId() == target.getId()) return true;
+        
+        return false;   // is tracking a different target
     }
 }

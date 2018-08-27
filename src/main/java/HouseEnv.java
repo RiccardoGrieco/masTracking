@@ -4,11 +4,14 @@ import jason.environment.Environment;
 import jason.environment.grid.Location;
 
 import java.util.List;
+import java.util.LinkedList;
 import java.util.logging.Logger;
 
 import java.awt.Rectangle;
 
 public final class HouseEnv extends Environment {
+
+    private static final int AGENT_RADIUS = 5;
 
     //Model variable
     private HouseModel model;
@@ -22,29 +25,78 @@ public final class HouseEnv extends Environment {
 
     @Override
     public void init(String[] args) {
-        model=new HouseModel(16, args[1],args[2]);
-        if (args[0].equals("gui")) {
-           HouseView view=new HouseView(model);
-           model.setView(view);
-        }
-
         //TODO togliere gli init fasulli da camera.asl, tracker, etc...
         initCameraAgentsPositions();
 
         initCameraAgentsViewZones();
 
         setCameraAgentsNoNeighbors();
-        
+
+        List<AgentModel> agents= initCameraAgentsPositionsModel();
+
+        initCameraAgentsViewZonesModel(agents);
+
+
+        model = new HouseModel(agents, args[1], args[2]);
+        if (args[0].equals("gui")) {
+           HouseView view=new HouseView(model);
+           model.setView(view);
+        }
+
         updatePercepts();
-        
+    }
+
+    /**
+     * 
+     */
+    List<AgentModel> initCameraAgentsPositionsModel(){
+        List<AgentModel> agents=new LinkedList<>();
+
+        // Room 1 (up-sx)
+        agents.add(new AgentModel.CameraAgent("camera1",1,1));
+        agents.add(new AgentModel.CameraAgent("camera2",9,1));
+        agents.add(new AgentModel.CameraAgent("camera3",1,9));
+        agents.add(new AgentModel.CameraAgent("camera4",9,9));
+
+        // Room 2 (up-dx)
+        agents.add(new AgentModel.CameraAgent("camera5",11,1));
+        agents.add(new AgentModel.CameraAgent("camera6",19,1));
+        agents.add(new AgentModel.CameraAgent("camera7",11,9));
+        agents.add(new AgentModel.CameraAgent("camera8",19,9));
+
+        // Room 3 (down-sx)
+        agents.add(new AgentModel.CameraAgent("camera9",1,11));
+        agents.add(new AgentModel.CameraAgent("camera10",9,11));
+        agents.add(new AgentModel.CameraAgent("camera11",1,19));
+        agents.add(new AgentModel.CameraAgent("camera12",9,19));
+
+        // Room 4 (down-dx)
+        agents.add(new AgentModel.CameraAgent("camera13",11,11));
+        agents.add(new AgentModel.CameraAgent("camera14",19,11));
+        agents.add(new AgentModel.CameraAgent("camera15",11,19));
+        agents.add(new AgentModel.CameraAgent("camera16",19,19));
+
+        return agents;
+    }
+
+    /**
+     * 
+     */
+    private void initCameraAgentsViewZonesModel(List<AgentModel> agents){
+        for(AgentModel agent : agents)
+            agent.setRadius(AGENT_RADIUS);
     }
 
     /** 
      * Update agents' percepts based on the HouseModel.
      */
     void updatePercepts() {
-        Location targetPos = null;
+        Location    targetPos = null,
+                    targetPrevPos = null;
+
         Rectangle camViewZone = null;
+
+        clearAllPercepts();
 
         // non va bene: il letterale 'target' lo usiamo solo quando un agente si accorge di un target.
         for (Target target : model.getTargets()) {
@@ -55,17 +107,37 @@ public final class HouseEnv extends Environment {
             ","+String.valueOf(position.y)+")"));
         }
 
-        //TODO trova un modo per implementare quest'idea
-        for(Agent cam : model.getCameraAgents()) {
-            // camViewZone = cam.getViewZone();
+        
+        for(AgentModel cam : model.getCameraAgents()) {
+            camViewZone = cam.getViewZone();
 
             for(Target target : model.getTargets()) {
                 targetPos = target.getPosition();
+
+                // ** TRACKING **
+                //TODO
+                // add to agentsTrackingMap
+                if(model.isAlreadyTracking(cam, target)) {
+                    // take previous target position
+                    if(camViewZone.contains(targetPos.x, targetPos.y)) {
+                        // delete previous tracking literal
+                        // update tracking literal with the new position
+                        // re-put agent-target pair into agentsTrackingMap
+                    }
+                }
                 
-                // if(camViewZone.contains(targetPos.x, targetPos.y))
-                // addPercept(cam.getName(), target(targetPos.x, targetPos.y));
+                // ** TARGET **
+                // A camera agent percepts a target if and only if the target is in
+                // the camera view zone and the camera is not tracking it yet.
+                if(camViewZone.contains(targetPos.x, targetPos.y) && 
+                    ! model.isAlreadyTracking(cam, target))
+                    addPercept(cam.getName(), 
+                            Literal.parseLiteral("target(" + targetPos.x + ", " + targetPos.y + ")"));
             }
         }
+
+        // ** LOOSING TARGET **
+        //TODO
     }
 
 
