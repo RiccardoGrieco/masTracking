@@ -67,6 +67,7 @@ public final class HouseView extends GridWorldView{
     @Override
     public void draw(Graphics g, int x, int y, int object) {
         //TODO
+        // disegna la view zone dell'agente camera in trasparenza (vediamo come viene)
         switch(object){
             case Target.TARGET:
             drawTarget(g, x, y);
