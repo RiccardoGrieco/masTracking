@@ -6,6 +6,11 @@ import java.util.concurrent.ThreadLocalRandom;
 import jason.environment.grid.Location;
 
 public final class Target{
+    //Id Target
+    private static int count=0;
+    private final int id;
+    private String idAgent = null;
+    private int progressiveNumber;
 
     //Useful information for the view in order to draw the right texture
     public static final int TARGET=16;
@@ -13,13 +18,23 @@ public final class Target{
     //Our Model reference
     private static HouseModel model;
 
+    public boolean equals(Object other) {
+        Target otherT = (Target) other;
+
+        return id == otherT.id;
+    }
+
+    public void setIdAgent(String id) {
+        idAgent = id;
+    }
+
+    public void setProgressiveNumber(int num) {
+        progressiveNumber = num;
+    }
+
     public static void setModel(HouseModel model) {
         Target.model = model;
     }
-
-    //Id Target
-    private static int count=0;
-    private final int id;
 
     public int getId() {
         return id;
@@ -30,6 +45,14 @@ public final class Target{
 
     public Location getPosition() {
         return position;
+    }
+
+    public String getIdAgent() {
+        return idAgent;
+    }
+
+    public int getProgressiveNumber() {
+        return progressiveNumber;
     }
 
     //Current path to destination

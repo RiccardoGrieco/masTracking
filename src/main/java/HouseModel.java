@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.Iterator;
 
 import org.jgrapht.GraphPath;
 import org.jgrapht.alg.shortestpath.KShortestSimplePaths;
@@ -21,8 +22,10 @@ import org.jgrapht.graph.DefaultUndirectedGraph;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import jason.asSyntax.PredicateIndicator;
 import jason.environment.grid.GridWorldModel;
 import jason.environment.grid.Location;
+import jason.asSyntax.Literal;
 
 public class HouseModel extends GridWorldModel{
 
@@ -40,7 +43,9 @@ public class HouseModel extends GridWorldModel{
     private static final int MAX_TARGET=5;
 
     //Target List useful for the environment
-    private final List<Target> targets=new ArrayList<>();
+    private final List<Target> targets = new ArrayList<>();
+
+    private List<Target> freeTargets = new ArrayList<>();
     
     private List<AgentModel> cameraAgents = new ArrayList<>();
     
@@ -246,8 +251,12 @@ public class HouseModel extends GridWorldModel{
                 int count=0;
                 while(count<MAX_TARGET){
                     try {
+                        Target newTarget = new Target();
+
+                        freeTargets.add(newTarget);
+
                         //Create a new target and inform view
-                        add(Target.TARGET,new Target().getPosition());
+                        add(Target.TARGET, newTarget.getPosition());
                         count++;
 
                         //take a long nap
@@ -292,7 +301,7 @@ public class HouseModel extends GridWorldModel{
         if(agentsTrackingMap.get(agent) == null) return false;  // is tracking no one
         
         if(agentsTrackingMap.get(agent).getId() == target.getId()) return true;
-        
+
         return false;   // is tracking a different target
     }
 }

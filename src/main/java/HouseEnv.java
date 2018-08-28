@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import java.util.logging.Logger;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Iterator;
 
 import java.awt.Rectangle;
 
@@ -100,14 +101,15 @@ public final class HouseEnv extends Environment {
         clearAllPercepts();
 
         // non va bene: il letterale 'target' lo usiamo solo quando un agente si accorge di un target.
-        for (Target target : model.getTargets()) {
+        /*for (Target target : model.getTargets()) {
             Location position=target.getPosition();
             addPercept(Literal.parseLiteral("target("+
             String.valueOf(target.getId())+""+
             String.valueOf(position.x)+
             ","+String.valueOf(position.y)+")"));
-        }
+        }*/
 
+        updateTargets();
         
         for(AgentModel cam : model.getCameraAgents()) {
             camViewZone = cam.getViewZone();
@@ -116,9 +118,7 @@ public final class HouseEnv extends Environment {
                 targetPos = target.getPosition();
 
                 // ** TRACKING **
-                //TODO
-                manageTracking(cam, target);
-                
+                manageTracking(cam, target);    // serve ancora dopo updateTargets???
                 
                 // ** TARGET **
                 // A camera agent percepts a target if and only if the target is in
@@ -128,25 +128,118 @@ public final class HouseEnv extends Environment {
                     addPercept(cam.getName(), 
                             Literal.parseLiteral("target(" + targetPos.x + ", " + targetPos.y + ")"));
             }
-        }
 
-        // ** LOOSING TARGET **
-        //TODO
+            // ** LOOSING TARGET **
+            if(isLosingItsTarget(cam)) {
+                Target target = model.getAgentsTrackingMap().get(cam);
+
+                addPercept(cam.getName(), 
+                    Literal.parseLiteral("losingTarget(" + 
+                        target.getIdAgent() + ", " + target.getIdAgent() + ", " + 
+                        target.getPosition().x + ", " + target.getPosition().y + ")"));
+            }
+        }
     }
 
-    public void manageTracking(AgentModel agent, Target target) {
+    /**
+     * Update in model the info about targets:
+     * - update the tracking map
+     * - update the target's id-pair
+     */
+    private void updateTargets() {
+
+        // clear the tracking-map cause there may be losted targets
+        model.getAgentsTrackingMap().clear();
+
+        for(Target target : model.getTargets()) {
+            boolean tracked = false;
+
+            for(AgentModel agent : model.getCameraAgents()) {
+                Iterator<Literal> itLiteral = agent.getBB().getCandidateBeliefs(new PredicateIndicator("tracking", 4));
+                
+                // if agent is tracking someone
+                if(itLiteral.hasNext()) {
+                    Literal lit = itLiteral.next();
+
+                    // take tracking position
+                    int x = Integer.valueOf(lit.getTermsArray()[2].toString());
+                    int y = Integer.valueOf(lit.getTermsArray()[3].toString());
+
+                    // agent is tracking someone else 
+                    if(target.getPosition().x != x || target.getPosition().y != y) continue;
+
+                    // target is properly the target tracked by agent
+                    model.getAgentsTrackingMap().put(agent, target);
+                    tracked = true;
+
+                    // if target has no id-pair
+                    if(target.getIdAgent() == null) {
+                        String idAgent = lit.getTermsArray()[0].toString();
+                        int progressiveN = Integer.valueOf(lit.getTermsArray()[1].toString());
+                        
+                        // it is the very first time for target: we must set it's id-pair 
+                        if(target.getPosition().x == x && target.getPosition().y == y) {
+                            target.setIdAgent(idAgent);
+                            target.setProgressiveNumber(progressiveN);
+                        }
+                    }
+                }
+            }
+
+            // target is not tracked: we must reset it's id-pair
+            if(tracked == false) target.setIdAgent(null);
+        }
+    }
+
+    /**
+     * Manage the literal 'tracking'.
+     */
+    private void manageTracking(AgentModel agent, Target target) {
         Rectangle camViewZone = agent.getViewZone();
         Location    targetPos = target.getPosition(),
                     targetPrevPos = null;
 
         if(model.isAlreadyTracking(agent, target)) {
             // take previous target position
+
             if(camViewZone.contains(targetPos.x, targetPos.y)) {
                 // delete previous tracking literal
                 // update tracking literal with the new position
                 // re-put agent-target pair into agentsTrackingMap
             }
         }
+    }
+
+    private Map<AgentModel, Long> losing = new HashMap<>();
+    private static final long DELTA_TIME_LOSING = 4000; //TODO set
+
+    /**
+     * Serve to manage the literal 'loosingTraget'.
+     * An agent is loosing it's target if he is on the agent's view zone edge
+     * and the tracking lasts for 4 seconds.
+     * @return true if and only if 'agent' is loosing it's target.
+     */
+    private boolean isLosingItsTarget(AgentModel agent) {
+        // tracking check
+        Target tracked = model.getAgentsTrackingMap().get(agent);
+        if(tracked==null)
+            return false;
+
+        // target at border check
+        Location trackedLocation = tracked.getPosition();
+        Rectangle viewZone = agent.getViewZone();
+        if(trackedLocation.x!=viewZone.x || trackedLocation.x!=viewZone.x+viewZone.width ||
+            trackedLocation.y!=viewZone.y || trackedLocation.y!=viewZone.y+viewZone.height)
+            return false;
+
+        // delta time check
+        Long lastTimeLosing = losing.get(agent);
+        long currentTimeMillis = System.currentTimeMillis();
+        if(lastTimeLosing!=null && currentTimeMillis-lastTimeLosing<DELTA_TIME_LOSING) return false;
+
+        losing.put(agent, currentTimeMillis);
+
+        return true;
     }
 
 
@@ -250,31 +343,5 @@ public final class HouseEnv extends Environment {
         addPercept("camera14", Literal.parseLiteral("noNeighbors(5)"));
         addPercept("camera15", Literal.parseLiteral("noNeighbors(5)"));
         addPercept("camera16", Literal.parseLiteral("noNeighbors(4)"));
-    }
-
-    private Map<AgentModel, Long> losing = new HashMap<>();
-    private static final long DELTA_TIME_LOSING = 4000; //TODO set
-
-    private boolean isLosingTarget(AgentModel agent) {
-        // tracking check
-        Target tracked = model.getAgentsTrackingMap().get(agent);
-        if(tracked==null)
-            return false;
-
-        // target at border check
-        Location trackedLocation = tracked.getPosition();
-        Rectangle viewZone = agent.getViewZone();
-        if(trackedLocation.x!=viewZone.x || trackedLocation.x!=viewZone.x+viewZone.width ||
-            trackedLocation.y!=viewZone.y || trackedLocation.y!=viewZone.y+viewZone.height)
-            return false;
-
-        // delta time check
-        Long lastTimeLosing = losing.get(agent);
-        long currentTimeMillis = System.currentTimeMillis();
-        if(lastTimeLosing!=null && currentTimeMillis-lastTimeLosing<DELTA_TIME_LOSING) return false;
-
-        losing.put(agent, currentTimeMillis);
-
-        return true;
     }
 }
