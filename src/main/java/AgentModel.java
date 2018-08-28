@@ -1,11 +1,12 @@
 import jason.architecture.*;
+import jason.asSemantics.Agent;
 import jason.environment.grid.Location;
 import java.awt.Rectangle;
 import java.util.*;
 
 
 
-public class AgentModel extends AgArch {
+public class AgentModel extends Agent {
     private String name;
     protected Location position;
     private Rectangle viewZone;
@@ -21,6 +22,12 @@ public class AgentModel extends AgArch {
         name = n;
         position = new Location(x, y);
         canMove = canM;
+    }
+
+    public boolean equals(Object other) {
+        AgentModel otherA = (AgentModel) other;
+
+        return name == otherA.name;
     }
 
     public void setViewZone(Rectangle rect) {
