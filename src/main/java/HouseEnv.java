@@ -32,10 +32,9 @@ public final class HouseEnv extends Environment {
 
         setCameraAgentsNoNeighbors();
 
-        List<AgentModel> agents= initCameraAgentsPositionsModel();
+        List<AgentModel> agents = initCameraAgentsPositionsModel();
 
         initCameraAgentsViewZonesModel(agents);
-
 
         model = new HouseModel(agents, args[1], args[2]);
         if (args[0].equals("gui")) {
@@ -50,7 +49,7 @@ public final class HouseEnv extends Environment {
      * 
      */
     List<AgentModel> initCameraAgentsPositionsModel(){
-        List<AgentModel> agents=new LinkedList<>();
+        List<AgentModel> agents = new LinkedList<>();
 
         // Room 1 (up-sx)
         agents.add(new AgentModel.CameraAgent("camera1",1,1));
@@ -116,21 +115,14 @@ public final class HouseEnv extends Environment {
 
                 // ** TRACKING **
                 //TODO
-                // add to agentsTrackingMap
-                if(model.isAlreadyTracking(cam, target)) {
-                    // take previous target position
-                    if(camViewZone.contains(targetPos.x, targetPos.y)) {
-                        // delete previous tracking literal
-                        // update tracking literal with the new position
-                        // re-put agent-target pair into agentsTrackingMap
-                    }
-                }
+                manageTracking(cam, target);
+                
                 
                 // ** TARGET **
                 // A camera agent percepts a target if and only if the target is in
                 // the camera view zone and the camera is not tracking it yet.
                 if(camViewZone.contains(targetPos.x, targetPos.y) && 
-                    ! model.isAlreadyTracking(cam, target))
+                        ! model.isAlreadyTracking(cam, target))
                     addPercept(cam.getName(), 
                             Literal.parseLiteral("target(" + targetPos.x + ", " + targetPos.y + ")"));
             }
@@ -138,6 +130,21 @@ public final class HouseEnv extends Environment {
 
         // ** LOOSING TARGET **
         //TODO
+    }
+
+    public void manageTracking(AgentModel agent, Target target) {
+        Rectangle camViewZone = agent.getViewZone();
+        Location    targetPos = target.getPosition(),
+                    targetPrevPos = null;
+
+        if(model.isAlreadyTracking(agent, target)) {
+            // take previous target position
+            if(camViewZone.contains(targetPos.x, targetPos.y)) {
+                // delete previous tracking literal
+                // update tracking literal with the new position
+                // re-put agent-target pair into agentsTrackingMap
+            }
+        }
     }
 
 
@@ -185,27 +192,27 @@ public final class HouseEnv extends Environment {
      */
     private void initCameraAgentsViewZones() {
         // Room 1 (up-sx)
-        addPercept("camera1", Literal.parseLiteral("canSee(5, 1, 1, 5)"));
-        addPercept("camera2", Literal.parseLiteral("canSee(5, 5, 9, 1)"));
-        addPercept("camera3", Literal.parseLiteral("canSee(1, 9, 5, 5)"));
-        addPercept("camera4", Literal.parseLiteral("canSee(5, 9, 9, 5)"));
+        addPercept("camera1", Literal.parseLiteral("canSee(1, 5, 5, 1)"));
+        addPercept("camera2", Literal.parseLiteral("canSee(5, 5, 10, 0)"));
+        addPercept("camera3", Literal.parseLiteral("canSee(0, 10, 5, 5)"));
+        addPercept("camera4", Literal.parseLiteral("canSee(5, 10, 10, 5)"));
 
         // Room 2 (up-dx)
-        addPercept("camera5", Literal.parseLiteral("canSee(5, 11, 1, 15)"));
-        addPercept("camera6", Literal.parseLiteral("canSee(5, 15, 19, 1)"));
-        addPercept("camera7", Literal.parseLiteral("canSee(11, 9, 5, 15)"));
-        addPercept("camera8", Literal.parseLiteral("canSee(11, 15, 5, 19)"));
+        addPercept("camera5", Literal.parseLiteral("canSee(10, 5, 15, 1)"));
+        addPercept("camera6", Literal.parseLiteral("canSee(15, 5, 19, 1)"));
+        addPercept("camera7", Literal.parseLiteral("canSee(10, 10, 15, 5)"));
+        addPercept("camera8", Literal.parseLiteral("canSee(15, 10, 19, 5)"));
 
         // Room 3 (down-sx)
-        addPercept("camera9", Literal.parseLiteral("canSee(1, 15, 5, 11)"));
-        addPercept("camera10", Literal.parseLiteral("canSee(5, 15, 9, 11)"));
+        addPercept("camera9", Literal.parseLiteral("canSee(1, 15, 5, 10)"));
+        addPercept("camera10", Literal.parseLiteral("canSee(5, 15, 10, 10)"));
         addPercept("camera11", Literal.parseLiteral("canSee(1, 19, 5, 15)"));
-        addPercept("camera12", Literal.parseLiteral("canSee(5, 19, 9, 15)"));
+        addPercept("camera12", Literal.parseLiteral("canSee(5, 19, 10, 15)"));
 
         // Room 4 (down-dx)
-        addPercept("camera13", Literal.parseLiteral("canSee(15, 11, 11, 15)"));
-        addPercept("camera14", Literal.parseLiteral("canSee(15, 15, 19, 11)"));
-        addPercept("camera15", Literal.parseLiteral("canSee(11, 19, 15, 15)"));
+        addPercept("camera13", Literal.parseLiteral("canSee(10, 15, 15, 10)"));
+        addPercept("camera14", Literal.parseLiteral("canSee(15, 15, 20, 10)"));
+        addPercept("camera15", Literal.parseLiteral("canSee(10, 20, 15, 15)"));
         addPercept("camera16", Literal.parseLiteral("canSee(15, 19, 19, 15)"));
     }
 
