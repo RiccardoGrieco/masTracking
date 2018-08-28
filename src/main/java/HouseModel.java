@@ -76,6 +76,10 @@ public class HouseModel extends GridWorldModel{
         return cameraAgents;
     }
 
+    public Map<AgentModel, Target> getAgentsTrackingMap() {
+        return agentsTrackingMap;
+    }
+
     //Rooms array
     private Rectangle[] rooms;
 

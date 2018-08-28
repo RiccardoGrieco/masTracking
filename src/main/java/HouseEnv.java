@@ -6,6 +6,8 @@ import jason.environment.grid.Location;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.logging.Logger;
+import java.util.Map;
+import java.util.HashMap;
 
 import java.awt.Rectangle;
 
@@ -248,5 +250,31 @@ public final class HouseEnv extends Environment {
         addPercept("camera14", Literal.parseLiteral("noNeighbors(5)"));
         addPercept("camera15", Literal.parseLiteral("noNeighbors(5)"));
         addPercept("camera16", Literal.parseLiteral("noNeighbors(4)"));
+    }
+
+    private Map<AgentModel, Long> losing = new HashMap<>();
+    private static final long DELTA_TIME_LOSING = 4000; //TODO set
+
+    private boolean isLosingTarget(AgentModel agent) {
+        // tracking check
+        Target tracked = model.getAgentsTrackingMap().get(agent);
+        if(tracked==null)
+            return false;
+
+        // target at border check
+        Location trackedLocation = tracked.getPosition();
+        Rectangle viewZone = agent.getViewZone();
+        if(trackedLocation.x!=viewZone.x || trackedLocation.x!=viewZone.x+viewZone.width ||
+            trackedLocation.y!=viewZone.y || trackedLocation.y!=viewZone.y+viewZone.height)
+            return false;
+
+        // delta time check
+        Long lastTimeLosing = losing.get(agent);
+        long currentTimeMillis = System.currentTimeMillis();
+        if(lastTimeLosing!=null && currentTimeMillis-lastTimeLosing<DELTA_TIME_LOSING) return false;
+
+        losing.put(agent, currentTimeMillis);
+
+        return true;
     }
 }
