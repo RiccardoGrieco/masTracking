@@ -237,8 +237,7 @@ public class HouseModel extends GridWorldModel{
 
     public void updateTarget(Location old, Location next){
         synchronized (this){
-            data[old.x][old.y]=0;
-            view.update(old.x,old.y);
+            remove(Target.TARGET, old.x, old.y);
             add(Target.TARGET,next);
         }
         
