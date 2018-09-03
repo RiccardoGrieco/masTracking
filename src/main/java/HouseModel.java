@@ -282,7 +282,7 @@ public class HouseModel extends GridWorldModel{
         initSpecialYellowBoxes();
 
         for (AgentModel.YellowBox box : yellowBoxes.values()) {
-            add(AgentModel.YellowBox.YELLOW_BOX, box.getPosition().x, box.getPosition().y);
+            add(box.getId(), box.getPosition().x, box.getPosition().y);
         }
     }
 
