@@ -24,8 +24,16 @@ public final class Target{
         return id == otherT.id;
     }
 
+    public int hashCode() {
+        return id;
+    }
+
     public void setIdAgent(String id) {
         idAgent = id;
+    }
+
+    public void setPosition(Location newPos) {
+        position = newPos;
     }
 
     public void setProgressiveNumber(int num) {
@@ -63,7 +71,7 @@ public final class Target{
     //Update position and inform view
     public void walk(){
         if(pathIterator!=null && pathIterator.hasNext()){
-            Location next=pathIterator.next();
+            Location next = pathIterator.next();
             while (!model.isFree(next)) {
                 try {
                     Thread.sleep(1000);
@@ -71,8 +79,9 @@ public final class Target{
                     e.printStackTrace();
                 }
             }
-            model.updateTarget(position, next);
-            position=next;
+            model.updateTarget(position, next);     // For view
+
+            position = next;
         }
         else
             destination=null;

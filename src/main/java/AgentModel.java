@@ -1,9 +1,10 @@
 import jason.architecture.*;
 import jason.asSemantics.Agent;
 import jason.environment.grid.Location;
+
+import java.awt.Color;
 import java.awt.Rectangle;
 import java.util.*;
-
 
 
 public class AgentModel extends Agent {
@@ -28,6 +29,10 @@ public class AgentModel extends Agent {
         AgentModel otherA = (AgentModel) other;
 
         return name == otherA.name;
+    }
+
+    public int hashCode() {
+        return name.hashCode();
     }
 
     public void setViewZone(Rectangle rect) {
@@ -143,9 +148,25 @@ public class AgentModel extends Agent {
     }
 
     public static final class YellowBox {
-        public static final int YELLOW_BOX = 128;
+        public static final int YELLOW_BOX = 64;
 
         private final Location position;
+        public static final Color MY_YELLOW = new Color(255, 255, 0, 50);
+        private int id = YELLOW_BOX;
+
+        /**
+         * @return the id
+         */
+        public int getId() {
+            return id;
+        }
+
+        /**
+         * @param id the id to set
+         */
+        public void setId(int id) {
+            this.id = id;
+        }
 
         /**
          * @return the position

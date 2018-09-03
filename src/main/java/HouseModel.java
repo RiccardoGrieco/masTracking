@@ -44,24 +44,23 @@ public class HouseModel extends GridWorldModel{
 
     //Target List useful for the environment
     private final List<Target> targets = new ArrayList<>();
-
-    private List<Target> freeTargets = new ArrayList<>();
     
     private List<AgentModel> cameraAgents = new ArrayList<>();
     
     //private final List<AgentModel> movingAgents = new ArrayList<>();
 
-    private Map<AgentModel, Target> agentsTrackingMap;  // has info about agents and their tracking
+    private Map<AgentModel, Target> agentsTrackingMap;          // has info about agents and their tracking
+    private Map<Target, AgentModel> inverseAgentsTrackingMap;    // 
 
     //private Map<MovingAgent, Target> movingTargetTrackingMap;
 
     //Lo conservo non si può mai sapere
-    private final List<AgentModel.YellowBox> yellowBoxes=new LinkedList<>();
+    private final Map<Location, AgentModel.YellowBox> yellowBoxes=new HashMap<>();
 
     /**
      * @return the yellowBoxes
      */
-    public List<AgentModel.YellowBox> getYellowBoxes() {
+    public Map<Location, AgentModel.YellowBox> getYellowBoxes() {
         return yellowBoxes;
     }
 
@@ -85,6 +84,10 @@ public class HouseModel extends GridWorldModel{
         return agentsTrackingMap;
     }
 
+    public Map<Target, AgentModel> getInverseAgentsTrackingMap() {
+        return inverseAgentsTrackingMap;
+    }
+
     //Rooms array
     private Rectangle[] rooms;
 
@@ -96,6 +99,7 @@ public class HouseModel extends GridWorldModel{
         super(WIDTH, HEIGHT, agents.size());
 
         agentsTrackingMap  = new HashMap<>();
+        inverseAgentsTrackingMap = new HashMap<>();
         //movingTargetTrackingMap  = new HashMap<>();
 
         cameraAgents = agents;
@@ -252,7 +256,7 @@ public class HouseModel extends GridWorldModel{
                     try {
                         Target newTarget = new Target();
 
-                        freeTargets.add(newTarget);
+                        targets.add(newTarget);
 
                         //Create a new target and inform view
                         add(Target.TARGET, newTarget.getPosition());
@@ -275,8 +279,9 @@ public class HouseModel extends GridWorldModel{
             initYellowBoxes(agent);
             
         }
+        initSpecialYellowBoxes();
 
-        for (AgentModel.YellowBox box : yellowBoxes) {
+        for (AgentModel.YellowBox box : yellowBoxes.values()) {
             add(AgentModel.YellowBox.YELLOW_BOX, box.getPosition().x, box.getPosition().y);
         }
     }
@@ -286,8 +291,35 @@ public class HouseModel extends GridWorldModel{
         Location position=agent.getPosition();
         for (int i = (int)viewZone.getMinX(); i < (int)viewZone.getMaxX(); i++) {
             for (int j = (int)viewZone.getMinY(); j < (int)viewZone.getMaxY(); j++){
-                if (i!=position.x || j!=position.y)
-                    yellowBoxes.add(new AgentModel.YellowBox(i,j));
+                AgentModel.YellowBox box=yellowBoxes.get(new Location(i, j));
+                if(box!=null)
+                    box.setId(2*box.getId());
+                else if(position.x==i && position.y==j)
+                    continue;
+                else
+                    yellowBoxes.put(new Location(i, j), new AgentModel.YellowBox(i, j));
+            }
+        }
+    }
+
+    private void initSpecialYellowBoxes(){
+        int a =WIDTH/2;
+        int b=HEIGHT/5;
+        for (int j = b; j < (b+1)*3; j+=a) {
+            for (int i = 0; i < 3; i++) {
+                Location location=new Location(j+i, 10);
+                AgentModel.YellowBox box=new AgentModel.YellowBox(j+i, 10);
+                box.setId(8*box.getId());
+                yellowBoxes.put(location, box);
+            }
+        }
+        
+        for (int j = b; j < (b+1)*3; j+=a) {
+            for (int i = 0; i < 3; i++) {
+                Location location=new Location( 10,j+i);
+                AgentModel.YellowBox box=new AgentModel.YellowBox( 10,j+i);
+                box.setId(8*box.getId());
+                yellowBoxes.put(location, box);
             }
         }
     }

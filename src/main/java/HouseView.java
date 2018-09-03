@@ -17,7 +17,7 @@ public final class HouseView extends GridWorldView{
 
     //Custom colors
     private static final Color MY_WHITE=new Color(238,238,238);
-    private static final Color MY_YELLOW=new Color(255, 255, 0, 70);
+   
 
     //Our model useful to update the canvas when new object are added
     private final HouseModel model;
@@ -79,20 +79,33 @@ public final class HouseView extends GridWorldView{
             break;
 
             case AgentModel.YellowBox.YELLOW_BOX:
-            drawYellowBox(g, x, y);
+            drawYellowBox(g, x, y, AgentModel.YellowBox.MY_YELLOW);
+            break;
+
+            case AgentModel.YellowBox.YELLOW_BOX*2:
+            drawYellowBox(g, x, y, AgentModel.YellowBox.MY_YELLOW.darker());
+            break;
+
+            case AgentModel.YellowBox.YELLOW_BOX*4:
+            drawYellowBox(g, x, y, AgentModel.YellowBox.MY_YELLOW.darker().darker());
+            break;
+
+            case AgentModel.YellowBox.YELLOW_BOX*8:
+            System.out.println("entrato in *8");
+            drawYellowBox(g, x, y, AgentModel.YellowBox.MY_YELLOW.darker().darker().darker());
             break;
         }
     }
 
-    public void drawYellowBox(Graphics g, int x, int y) {
-        g.setColor(MY_YELLOW);
+    public void drawYellowBox(Graphics g, int x, int y, Color color) {
+        g.setColor(color);
         g.fillRect(x * cellSizeW + 1, y * cellSizeH+1, cellSizeW-1, cellSizeH-1);
 
     }
 
      public void drawCamera(Graphics g, int x, int y ){
         g.drawImage(TEXTURE_LIBRARY.get(CAMERA), x * cellSizeW+1, y*cellSizeH+1, cellSizeW-1, cellSizeH-1,null);
-        g.setColor(MY_YELLOW);
+        g.setColor(AgentModel.YellowBox.MY_YELLOW);
         g.fillRect(x * cellSizeW + 1, y * cellSizeH+1, cellSizeW-1, cellSizeH-1);
      }
 
