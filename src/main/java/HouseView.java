@@ -91,7 +91,6 @@ public final class HouseView extends GridWorldView{
             break;
 
             case AgentModel.YellowBox.YELLOW_BOX*8:
-            System.out.println("entrato in *8");
             drawYellowBox(g, x, y, AgentModel.YellowBox.MY_YELLOW.darker().darker().darker());
             break;
         }

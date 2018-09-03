@@ -309,7 +309,10 @@ public class HouseModel extends GridWorldModel{
             for (int i = 0; i < 3; i++) {
                 Location location=new Location(j+i, 10);
                 AgentModel.YellowBox box=new AgentModel.YellowBox(j+i, 10);
-                box.setId(8*box.getId());
+                if (i==1)
+                    box.setId(8*box.getId());
+                else
+                    box.setId(2*box.getId());
                 yellowBoxes.put(location, box);
             }
         }
@@ -318,7 +321,10 @@ public class HouseModel extends GridWorldModel{
             for (int i = 0; i < 3; i++) {
                 Location location=new Location( 10,j+i);
                 AgentModel.YellowBox box=new AgentModel.YellowBox( 10,j+i);
-                box.setId(8*box.getId());
+                if (i==1)
+                    box.setId(8*box.getId());
+                else
+                    box.setId(2*box.getId());
                 yellowBoxes.put(location, box);
             }
         }
