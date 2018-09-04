@@ -7,12 +7,21 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.logging.Logger;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.util.Map;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-
+import java.awt.Point;
 import java.awt.Rectangle;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 public final class HouseEnv extends Environment {
 
@@ -65,6 +74,9 @@ public final class HouseEnv extends Environment {
     //Logger 
     static Logger logger = Logger.getLogger(HouseEnv.class.getName());
 
+    //Agents Descriptions
+    private JSONArray agentsJSON;
+
 
     @Override
     public void init(String[] args) {
@@ -73,20 +85,34 @@ public final class HouseEnv extends Environment {
         losingTargetsRecentlyNotified = new ForgetfulSet<AgentModel>();
         
 
-        //TODO togliere gli init fasulli da camera.asl, tracker, etc...
+        //Loading Json
+        parseAgents("agents.json");
+
+        //INIT JASON AGENTS
+
         initCameraAgentsPositions();
 
         initCameraAgentsViewZones();
 
         setCameraAgentsNoNeighbors();
 
+
+
+        //INIT MODEL AGENTS
+
         List<AgentModel> agents = initCameraAgentsPositionsModel();
 
-        initCameraAgentsViewZonesModel(agents);
+        initCameraAgentsShadowZone(agents);
+
+        initCameraAgentsViewZonesModel(agents); //TODO
+
+
 
         addPercept(Literal.parseLiteral("numberOfAgents(" + agents.size() + ")"));
 
         model = new HouseModel(agents, args[1], args[2]);
+
+
         if (args[0].equals("gui")) {
            HouseView view = new HouseView(model);
            model.setView(view);
@@ -97,35 +123,63 @@ public final class HouseEnv extends Environment {
         updatePercepts();
     }
 
+    private void parseAgents(String file){
+        String result=null;
+        try {
+            InputStream inputStream = new FileInputStream("resources/"+file);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"), 8);
+            StringBuilder sb = new StringBuilder();
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                sb.append(line).append("\n");
+            }
+            result = sb.toString();
+            reader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+       agentsJSON =new JSONObject(result).getJSONArray("agents");
+    }
+
+    public void initCameraAgentsShadowZone(List<AgentModel> agents){
+        
+        for (int i = 0; i < agentsJSON.length(); i++) {
+            JSONObject obj= agentsJSON.getJSONObject(i);
+            AgentModel camera=null;
+            for (AgentModel agent  : agents) {
+                if(agent.getName().equalsIgnoreCase(obj.getString("name"))){
+                    camera=agent;
+                    break;
+                }
+            }
+            List<Point> points=new ArrayList<>();
+            camera.setShadowZones(points);
+            JSONArray pointArray= obj.getJSONArray("shadowZones");
+            for (int j = 0; j < pointArray.length(); j++) {
+                JSONObject pointObj=pointArray.getJSONObject(j);
+                points.add(new Point(pointObj.getInt("x"), pointObj.getInt("y")));
+            }
+        }
+
+    }
+
+
+
     /**
      * 
      */
     List<AgentModel> initCameraAgentsPositionsModel(){
         List<AgentModel> agents = new LinkedList<>();
-
-        // Room 1 (up-sx)
-        agents.add(new AgentModel.CameraAgent("camera1",1,1));
-        agents.add(new AgentModel.CameraAgent("camera2",9,1));
-        agents.add(new AgentModel.CameraAgent("camera3",1,9));
-        agents.add(new AgentModel.CameraAgent("camera4",9,9));
-
-        // Room 2 (up-dx)
-        agents.add(new AgentModel.CameraAgent("camera5",11,1));
-        agents.add(new AgentModel.CameraAgent("camera6",19,1));
-        agents.add(new AgentModel.CameraAgent("camera7",11,9));
-        agents.add(new AgentModel.CameraAgent("camera8",19,9));
-
-        // Room 3 (down-sx)
-        agents.add(new AgentModel.CameraAgent("camera9",1,11));
-        agents.add(new AgentModel.CameraAgent("camera10",9,11));
-        agents.add(new AgentModel.CameraAgent("camera11",1,19));
-        agents.add(new AgentModel.CameraAgent("camera12",9,19));
-
-        // Room 4 (down-dx)
-        agents.add(new AgentModel.CameraAgent("camera13",11,11));
-        agents.add(new AgentModel.CameraAgent("camera14",19,11));
-        agents.add(new AgentModel.CameraAgent("camera15",11,19));
-        agents.add(new AgentModel.CameraAgent("camera16",19,19));
+        for (int i = 0; i < agentsJSON.length(); i++) {
+            JSONObject agent=agentsJSON.getJSONObject(i);
+            JSONObject pos=agent.getJSONObject("position");
+            String name=agent.getString("name");
+            int x=pos.getInt("x");
+            int y=pos.getInt("y");
+            agents.add(new AgentModel.CameraAgent(name,x,y));
+        }
 
         return agents;
     }
@@ -348,29 +402,13 @@ public final class HouseEnv extends Environment {
      * and the camera agents must be 16.
      */
     private void initCameraAgentsPositions() {
-        // Room 1 (up-sx)
-        addPercept("camera1", Literal.parseLiteral("myPosition(1, 1)"));
-        addPercept("camera2", Literal.parseLiteral("myPosition(9, 1)"));
-        addPercept("camera3", Literal.parseLiteral("myPosition(1, 9)"));
-        addPercept("camera4", Literal.parseLiteral("myPosition(9, 9)"));
 
-        // Room 2 (up-dx)
-        addPercept("camera5", Literal.parseLiteral("myPosition(11, 1)"));
-        addPercept("camera6", Literal.parseLiteral("myPosition(19, 1)"));
-        addPercept("camera7", Literal.parseLiteral("myPosition(11, 9)"));
-        addPercept("camera8", Literal.parseLiteral("myPosition(19, 9)"));
-
-        // Room 3 (down-sx)
-        addPercept("camera9", Literal.parseLiteral("myPosition(1, 11)"));
-        addPercept("camera10", Literal.parseLiteral("myPosition(9, 11)"));
-        addPercept("camera11", Literal.parseLiteral("myPosition(1, 19)"));
-        addPercept("camera12", Literal.parseLiteral("myPosition(9, 19)"));
-
-        // Room 4 (down-dx)
-        addPercept("camera13", Literal.parseLiteral("myPosition(11, 11)"));
-        addPercept("camera14", Literal.parseLiteral("myPosition(19, 11)"));
-        addPercept("camera15", Literal.parseLiteral("myPosition(11, 19)"));
-        addPercept("camera16", Literal.parseLiteral("myPosition(19, 19)"));
+        for (int i = 0; i < agentsJSON.length(); i++) {
+            JSONObject obj= agentsJSON.getJSONObject(i);
+            JSONObject pos=obj.getJSONObject("position");
+            Integer x=pos.getInt("x"), y=pos.getInt("y");
+            addPercept(obj.getString("name"),Literal.parseLiteral("myPosition("+x+", "+y+")"));
+            }
     }
 
     /**
@@ -380,8 +418,18 @@ public final class HouseEnv extends Environment {
      * and the camera agents must be 16.
      */
     private void initCameraAgentsViewZones() {
+
+        for (int i = 0; i < agentsJSON.length(); i++) {
+            JSONObject obj= agentsJSON.getJSONObject(i);
+            JSONArray cArray=obj.getJSONArray("canSee");
+            JSONObject pos1=cArray.getJSONObject(0) , pos2=cArray.getJSONObject(1);
+            Integer x1=pos1.getInt("x1"), y1=pos1.getInt("y1"), x2=pos2.getInt("x2"), y2=pos2.getInt("y2");
+            addPercept(obj.getString("name"),Literal.parseLiteral("canSee("+x1+", "+y1+", "+x2+", "+y2+")"));
+            }
+
+
         // Room 1 (up-sx)
-        addPercept("camera1", Literal.parseLiteral("canSee(1, 5, 5, 1)"));
+  /*  addPercept("camera1", Literal.parseLiteral("canSee(1, 5, 5, 1)"));
         addPercept("camera2", Literal.parseLiteral("canSee(5, 5, 10, 0)"));
         addPercept("camera3", Literal.parseLiteral("canSee(0, 10, 5, 5)"));
         addPercept("camera4", Literal.parseLiteral("canSee(5, 10, 10, 5)"));
@@ -402,7 +450,7 @@ public final class HouseEnv extends Environment {
         addPercept("camera13", Literal.parseLiteral("canSee(10, 15, 15, 10)"));
         addPercept("camera14", Literal.parseLiteral("canSee(15, 15, 20, 10)"));
         addPercept("camera15", Literal.parseLiteral("canSee(10, 20, 15, 15)"));
-        addPercept("camera16", Literal.parseLiteral("canSee(15, 19, 19, 15)"));
+        addPercept("camera16", Literal.parseLiteral("canSee(15, 19, 19, 15)"));*/
     }
 
     /**
@@ -414,6 +462,14 @@ public final class HouseEnv extends Environment {
      * and the camera agents must be 16.
      */
     private void setCameraAgentsNoNeighbors() {
+
+        for (int i = 0; i < agentsJSON.length(); i++) {
+            JSONObject obj= agentsJSON.getJSONObject(i);
+            int x=obj.getInt("noNeighbors");
+            addPercept(obj.getString("name"),Literal.parseLiteral("noNeighBors("+x+")"));
+            }
+
+/*
         // Room 1 (up-sx)
         addPercept("camera1", Literal.parseLiteral("noNeighbors(4)"));
         addPercept("camera2", Literal.parseLiteral("noNeighbors(5)"));
@@ -436,6 +492,6 @@ public final class HouseEnv extends Environment {
         addPercept("camera13", Literal.parseLiteral("noNeighbors(6)"));
         addPercept("camera14", Literal.parseLiteral("noNeighbors(5)"));
         addPercept("camera15", Literal.parseLiteral("noNeighbors(5)"));
-        addPercept("camera16", Literal.parseLiteral("noNeighbors(4)"));
+        addPercept("camera16", Literal.parseLiteral("noNeighbors(4)"));*/
     }
 }

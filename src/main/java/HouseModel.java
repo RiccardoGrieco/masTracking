@@ -1,3 +1,4 @@
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -233,6 +234,7 @@ public class HouseModel extends GridWorldModel{
                 rooms[i]=new Rectangle(x,y,width,height);
             }
     }
+
 
     public List<Location> getAPath(Location start, Location end){           
        List<GraphPath<Location,DefaultEdge>> paths= builderPaths.getPaths(start, end, 80);

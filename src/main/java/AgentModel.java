@@ -3,6 +3,7 @@ import jason.asSemantics.Agent;
 import jason.environment.grid.Location;
 
 import java.awt.Color;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.*;
 
@@ -13,6 +14,22 @@ public class AgentModel extends Agent {
     private Rectangle viewZone;
     private boolean canMove;
     private int radius;
+
+    private List<Point> shadowZones;
+
+    /**
+     * @return the points
+     */
+    public List<Point> getshadowZones() {
+        return shadowZones;
+    }
+
+    /**
+     * @param shadowZones the shadowZones to set
+     */
+    public void setShadowZones(List<Point> shadowZones) {
+        this.shadowZones = shadowZones;
+    }
 
     private static HouseModel model;
 
@@ -49,7 +66,7 @@ public class AgentModel extends Agent {
 
     public void setRadius(int radius) {
         this.radius = radius;
-        int x=position.x,y=position.y;
+        int x=position.x,y=position.y;          
         if ((x>8 && x<10) || x>18)
             x-=radius-1;
         if((y>8 && y<10) || y>18)
