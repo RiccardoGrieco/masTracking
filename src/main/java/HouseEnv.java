@@ -86,9 +86,11 @@ public final class HouseEnv extends Environment {
 
         model = new HouseModel(agents, args[1], args[2]);
         if (args[0].equals("gui")) {
-           HouseView view=new HouseView(model);
+           HouseView view = new HouseView(model);
            model.setView(view);
         }
+
+        System.out.println("World initialized.");
 
         updatePercepts();
     }
@@ -143,7 +145,7 @@ public final class HouseEnv extends Environment {
 
         Rectangle camViewZone = null;
 
-        clearAllPercepts();
+        //clearAllPercepts();
 
         // non va bene: il letterale 'target' lo usiamo solo quando un agente si accorge di un target.
         /*for (Target target : model.getTargets()) {
@@ -173,6 +175,8 @@ public final class HouseEnv extends Environment {
             if(targetsRecentlyNotified.contains(target)) continue;
 
             for(AgentModel agent : model.getCameraAgents()) {
+                camViewZone = agent.getViewZone();
+
                 if(tracker == null || !tracker.equals(agent)) {
                     // ** TARGET **
                     // A camera agent percepts a target if and only if the target is in
@@ -208,12 +212,13 @@ public final class HouseEnv extends Environment {
     }
 
     /**
-     * Update in model the info about targets:
-     * - update the tracking map
+     * Update, in model, info about targets:
+     * - update the tracking maps
      * - update the target's id-pair
      */
     private void updateModel() {
         List<Target> freeTargets = new ArrayList<>(model.getTargets());
+        Iterator<Literal> itLiteral = null;
 
         // clear the tracking-map cause there may be losted targets
         model.getAgentsTrackingMap().clear();
@@ -221,7 +226,13 @@ public final class HouseEnv extends Environment {
 
         // manage tracking changes
         for(AgentModel agent : model.getCameraAgents()) {
-            Iterator<Literal> itLiteral = agent.getBB().getCandidateBeliefs(new PredicateIndicator("tracking", 4));
+            try {
+                itLiteral = agent.getBB().getCandidateBeliefs(new PredicateIndicator("tracking", 4));
+            }
+            catch(NullPointerException e) {
+                continue;   // predicate not found: go to next agent.
+            }
+
             if(itLiteral.hasNext()) {
                 Literal lit = itLiteral.next();
                 String name = lit.getTermsArray()[0].toString();
@@ -241,8 +252,12 @@ public final class HouseEnv extends Environment {
             boolean tracked = false;
 
             for(AgentModel agent : model.getCameraAgents()) {
-                Iterator<Literal> itLiteral = agent.getBB().getCandidateBeliefs(new PredicateIndicator("tracking", 4));
-                
+                try {
+                    itLiteral = agent.getBB().getCandidateBeliefs(new PredicateIndicator("tracking", 4));
+                }
+                catch(NullPointerException e) {
+                    continue;   // predicate not found: go to next agent.
+                }
                 // if agent is tracking someone
                 if(itLiteral.hasNext()) {
                     Literal lit = itLiteral.next();
@@ -284,27 +299,8 @@ public final class HouseEnv extends Environment {
         }
     }
 
-    /**
-     * Manage the literal 'tracking'.
-     */
-    private void manageTracking(AgentModel agent, Target target) {
-        Rectangle camViewZone = agent.getViewZone();
-        Location    targetPos = target.getPosition(),
-                    targetPrevPos = null;
-
-        if(model.isAlreadyTracking(agent, target)) {
-            // take previous target position
-
-            if(camViewZone.contains(targetPos.x, targetPos.y)) {
-                // delete previous tracking literal
-                // update tracking literal with the new position
-                // re-put agent-target pair into agentsTrackingMap
-            }
-        }
-    }
-
     private Map<AgentModel, Long> losing = new HashMap<>();
-    private static final long DELTA_TIME_LOSING = 4000; //TODO set
+    private static final long DELTA_TIME_LOSING = 4000; //TODO set it properly!
 
     /**
      * Serve to manage the literal 'loosingTraget'.

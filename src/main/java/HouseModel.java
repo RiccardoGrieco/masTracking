@@ -40,7 +40,7 @@ public class HouseModel extends GridWorldModel{
     KShortestSimplePaths<Location,DefaultEdge> builderPaths;
 
     //Maximum Target number
-    private static final int MAX_TARGET=5;
+    private static final int MAX_TARGET = 1;        // TO CHANGE!
 
     //Target List useful for the environment
     private final List<Target> targets = new ArrayList<>();
@@ -257,6 +257,8 @@ public class HouseModel extends GridWorldModel{
                         Target newTarget = new Target();
 
                         targets.add(newTarget);
+                        System.out.println("A wild target appears in position (" + 
+                            newTarget.getPosition() + ")!");
 
                         //Create a new target and inform view
                         add(Target.TARGET, newTarget.getPosition());

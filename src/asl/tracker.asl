@@ -4,7 +4,7 @@
 
 //TODO these should be perceived from environment or set on agent creation
 //auctionNumber(1).
-numberOfAgents(2).
+//numberOfAgents(2).
 progressiveNo(1).
 
 /* RULES */
@@ -195,7 +195,7 @@ amInterested(X,Y) :-
 // confirm the win to the auctioneer.
 +winner(Ag, Tid, X, Y)[source(S)] 
     :   not tracking(_,_,_,_) //TODO check correctness
-        & .print("Not tracking anything, i confirm") //TODO remove this
+        & .print("I'm tracking no one, I confirm my win.") //TODO remove this
     <-  -winner(Ag, Tid, X, Y)[source(S)];
         .send(S, achieve, confirm(Ag, Tid, true));
         +tracking(Ag, Tid, X, Y).
@@ -204,7 +204,7 @@ amInterested(X,Y) :-
 // for another auction, lose the current target and confirm the win.
 +winner(Ag, Tid, X, Y)[source(S)] 
     :   auctionOngoing(AuctionAg, AuctionTid,_,_) //TODO check correctness
-        & .print("Auction ongoing, i lose my target and confirm") //TODO remove this
+        & .print("Auction ongoing, I lose my target and I confirm my win.") //TODO remove this
     <-  -winner(Ag, Tid, X, Y)[source(S)];
         +tracking(Ag, Tid, X, Y);
         -tracking(AuctionAg, AuctionTid, _, _);
@@ -215,7 +215,7 @@ amInterested(X,Y) :-
 +winner(Ag, Tid, X, Y)[source(S)]
     :   tracking(TrackedAg,TrackedTid, TrackedX, TrackedY) & 
         not auctionOngoing(TrackedAg,TrackedTid , _, _)
-    <-  .print("I'm the winner but i'm tracking someone. I'll start the auction for ",TrackedAg,"-", TrackedTid);
+    <-  .print("I'm the winner but I'm tracking someone. I'll start the auction for ",TrackedAg,"-", TrackedTid);
         +auctionOngoing(TrackedAg,TrackedTid , TrackedX, TrackedY);
         .broadcast(achieve, cfp(TrackedAg, TrackedTid, TrackedX, TrackedY)).
 
@@ -229,7 +229,7 @@ amInterested(X,Y) :-
 
 // When I perceive a new target, ask the other agents whether
 // it's tracked by one of them.
-+target(X,Y)[source(self)]  <-  .broadcast(achieve, tellMeTracking(X,Y)).
++target(X,Y)[source(percept)]  <-  .broadcast(achieve, tellMeTracking(X,Y)).
 
 // Tell another agent if I'm already tracking a target at the specified position
 // and whether I'm interested in it or not.
