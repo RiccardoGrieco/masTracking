@@ -2,6 +2,7 @@
     "agents":[
         {
             "name": "camera1",
+            "noNeighbors": 4,
             "position": {
                 "x": 1,
                 "y": 1
@@ -57,6 +58,7 @@
         },
         {
             "name": "camera2",
+            "noNeighbors": 5,
             "position": {
                 "x": 9,
                 "y": 1
@@ -120,6 +122,7 @@
         },
         {
             "name": "camera3",
+            "noNeighbors": 5,
             "position": {
                 "x": 1,
                 "y": 9
@@ -183,6 +186,7 @@
         },
         {
             "name": "camera4",
+            "noNeighbors": 6,
             "position": {
                 "x": 9,
                 "y": 9
@@ -254,6 +258,7 @@
         },
         {
             "name": "camera5",
+            "noNeighbors": 5,
             "position": {
                 "x": 11,
                 "y": 1
@@ -317,6 +322,7 @@
         },
         {
             "name": "camera6",
+            "noNeighbors": 4,
             "position": {
                 "x": 19,
                 "y": 1
@@ -372,6 +378,7 @@
         },
         {
             "name": "camera7",
+            "noNeighbors": 6,
             "position": {
                 "x": 11,
                 "y": 9
@@ -443,6 +450,7 @@
         },
         {
             "name": "camera8",
+            "noNeighbors": 5,
             "position": {
                 "x": 19,
                 "y": 9
@@ -506,6 +514,7 @@
         },
         {
             "name": "camera9",
+            "noNeighbors": 5,
             "position": {
                 "x": 1,
                 "y": 11
@@ -569,6 +578,7 @@
         },
         {
             "name": "camera10",
+            "noNeighbors": 6,
             "position": {
                 "x": 9,
                 "y": 11
@@ -640,6 +650,7 @@
         },
         {
             "name": "camera11",
+            "noNeighbors": 4,
             "position": {
                 "x": 1,
                 "y": 19
@@ -695,6 +706,7 @@
         },
         {
             "name": "camera12",
+            "noNeighbors": 5,
             "position": {
                 "x": 9,
                 "y": 19
@@ -758,6 +770,7 @@
         },
         {
             "name": "camera13",
+            "noNeighbors": 6,
             "position": {
                 "x": 11,
                 "y": 11
@@ -829,6 +842,7 @@
         },
         {
             "name": "camera14",
+            "noNeighbors": 5,
             "position": {
                 "x": 19,
                 "y": 11
@@ -892,6 +906,7 @@
         },
         {
             "name": "camera15",
+            "noNeighbors": 5,
             "position": {
                 "x": 11,
                 "y": 19
@@ -955,6 +970,7 @@
         },
         {
             "name": "camera16",
+            "noNeighbors": 4,
             "position": {
                 "x": 19,
                 "y": 19
