@@ -466,32 +466,7 @@ public final class HouseEnv extends Environment {
         for (int i = 0; i < agentsJSON.length(); i++) {
             JSONObject obj= agentsJSON.getJSONObject(i);
             int x=obj.getInt("noNeighbors");
-            addPercept(obj.getString("name"),Literal.parseLiteral("noNeighBors("+x+")"));
-            }
-
-/*
-        // Room 1 (up-sx)
-        addPercept("camera1", Literal.parseLiteral("noNeighbors(4)"));
-        addPercept("camera2", Literal.parseLiteral("noNeighbors(5)"));
-        addPercept("camera3", Literal.parseLiteral("noNeighbors(5)"));
-        addPercept("camera4", Literal.parseLiteral("noNeighbors(6)"));
-
-        // Room 2 (up-dx)
-        addPercept("camera5", Literal.parseLiteral("noNeighbors(5)"));
-        addPercept("camera6", Literal.parseLiteral("noNeighbors(4)"));
-        addPercept("camera7", Literal.parseLiteral("noNeighbors(6)"));
-        addPercept("camera8", Literal.parseLiteral("noNeighbors(5)"));
-
-        // Room 3 (down-sx)
-        addPercept("camera9", Literal.parseLiteral("noNeighbors(5)"));
-        addPercept("camera10", Literal.parseLiteral("noNeighbors(6)"));
-        addPercept("camera11", Literal.parseLiteral("noNeighbors(4)"));
-        addPercept("camera12", Literal.parseLiteral("noNeighbors(5)"));
-
-        // Room 4 (down-dx)
-        addPercept("camera13", Literal.parseLiteral("noNeighbors(6)"));
-        addPercept("camera14", Literal.parseLiteral("noNeighbors(5)"));
-        addPercept("camera15", Literal.parseLiteral("noNeighbors(5)"));
-        addPercept("camera16", Literal.parseLiteral("noNeighbors(4)"));*/
+            addPercept(obj.getString("name"),Literal.parseLiteral("noNeighbors("+x+")"));
+        }
     }
 }
