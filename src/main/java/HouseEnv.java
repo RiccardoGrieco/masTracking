@@ -84,6 +84,8 @@ public final class HouseEnv extends Environment {
 
         initCameraAgentsViewZonesModel(agents);
 
+        addPercept(Literal.parseLiteral("numberOfAgents(" + agents.size() + ")"));
+
         model = new HouseModel(agents, args[1], args[2]);
         if (args[0].equals("gui")) {
            HouseView view = new HouseView(model);
@@ -300,7 +302,7 @@ public final class HouseEnv extends Environment {
     }
 
     private Map<AgentModel, Long> losing = new HashMap<>();
-    private static final long DELTA_TIME_LOSING = 4000; //TODO set it properly!
+    private static final long DELTA_TIME_LOSING = 500; //TODO set it properly!
 
     /**
      * Serve to manage the literal 'loosingTraget'.
@@ -311,13 +313,16 @@ public final class HouseEnv extends Environment {
     private boolean isLosingItsTarget(AgentModel agent) {
         // tracking check
         Target tracked = model.getAgentsTrackingMap().get(agent);
+        System.out.println("Agente " + agent.getName() + " VZ " + agent.getViewZone());
+        System.out.println("Agente " + agent.getName() + " VZ " + agent.getViewZone().getBounds());
         if(tracked==null)
             return false;
 
         // target at border check
         Location trackedLocation = tracked.getPosition();
         Rectangle viewZone = agent.getViewZone();
-        if(trackedLocation.x!=viewZone.x || trackedLocation.x!=viewZone.x+viewZone.width ||
+        
+        if(trackedLocation.x <= viewZone.x && trackedLocation.x != viewZone.x+viewZone.width ||
             trackedLocation.y!=viewZone.y || trackedLocation.y!=viewZone.y+viewZone.height)
             return false;
 

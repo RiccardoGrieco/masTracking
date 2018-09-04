@@ -254,13 +254,39 @@ amInterested(X,Y) :-
 +alreadyTracking(X,Y,V,_)[source(S)]
     :   numberOfAgents(N) &
         .findall(Ag, alreadyTracking(X,Y,V,_)[source(Ag)], ListOfAnswerers) &
-        .length(ListOfAnswerers,N) &
+        .length(ListOfAnswerers,N-1) &
+        .print("alreadyTracking: sto confrontando il numero di risposte con", N-1) &
         not alreadyTracking(X,Y,true,_) &
         .findall(I, alreadyTracking(X,Y,_,true)[source(I)], ListOfInterested) &
+        .length(ListOfInterested, 0) &      // se nessun altro è interessato
+        .print("ListOfInterested=", ListOfInterested) &
         progressiveNo(Tid) & .my_name(Name) &
-        .abolish(alreadyTracking(X, Y, _, _)) &
-        .max(ListOfInterested, Max) & Max<=Name 
-    <-  +tracking(Name, Tid, X,Y);
+        .print("alreadyTracking: Name=", Name) &
+        .abolish(alreadyTracking(X, Y, _, _)) 
+        //.max(ListOfInterested, Max) &
+        //.print("alreadyTracking: Max=", Max) & 
+        //Max<=Name 
+    <-  +tracking(Name, Tid, X, Y);
+        .print("No one is interested about the target, I start to track the target!");
+        -progressiveNo(Tid);
+        +progressiveNo(Tid+1).
+
++alreadyTracking(X,Y,V,_)[source(S)]
+    :   numberOfAgents(N) &
+        .findall(Ag, alreadyTracking(X,Y,V,_)[source(Ag)], ListOfAnswerers) &
+        .length(ListOfAnswerers,N-1) &
+        .print("alreadyTracking: sto confrontando il numero di risposte con", N-1) &
+        not alreadyTracking(X,Y,true,_) &
+        .findall(I, alreadyTracking(X,Y,_,true)[source(I)], ListOfInterested) &
+        .print("ListOfInterested=", ListOfInterested) &
+        progressiveNo(Tid) & .my_name(Name) &
+        .print("alreadyTracking: Name=", Name) &
+        //.abolish(alreadyTracking(X, Y, _, _)) &
+        .max(ListOfInterested, Max) &
+        .print("alreadyTracking: Max=", Max) & 
+        Max<=Name 
+    <-  +tracking(Name, Tid, X, Y);
+        .print("Someone is interested about the target, but I win and I start to track the target!");
         -progressiveNo(Tid);
         +progressiveNo(Tid+1).
 
