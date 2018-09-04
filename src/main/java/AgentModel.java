@@ -36,6 +36,10 @@ public class AgentModel extends Agent {
     /**
      * Constructor.
      */
+
+     public AgentModel(){
+         System.out.println("creazione standard");
+     }
     public AgentModel(String n, int x, int y, boolean canM) {
         name = n;
         position = new Location(x, y);
@@ -106,6 +110,10 @@ public class AgentModel extends Agent {
      */
     public static final class CameraAgent extends AgentModel {
         public static final int CAMERA = 32;
+
+        public CameraAgent(){
+            System.out.println("Prova"); //TODO
+        }
 
         public CameraAgent(String name, int x, int y){
             super(name, x, y, false);

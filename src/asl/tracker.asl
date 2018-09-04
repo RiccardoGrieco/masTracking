@@ -255,13 +255,11 @@ amInterested(X,Y) :-
     :   numberOfAgents(N) &
         .findall(Ag, alreadyTracking(X,Y,V,_)[source(Ag)], ListOfAnswerers) &
         .length(ListOfAnswerers,N-1) &
-        .print("alreadyTracking: sto confrontando il numero di risposte con", N-1) &
         not alreadyTracking(X,Y,true,_) &
         .findall(I, alreadyTracking(X,Y,_,true)[source(I)], ListOfInterested) &
         .length(ListOfInterested, 0) &      // se nessun altro è interessato
-        .print("ListOfInterested=", ListOfInterested) &
         progressiveNo(Tid) & .my_name(Name) &
-        .print("alreadyTracking: Name=", Name) &
+        .print("alreadyTracking") &
         .abolish(alreadyTracking(X, Y, _, _)) 
         //.max(ListOfInterested, Max) &
         //.print("alreadyTracking: Max=", Max) & 
@@ -275,7 +273,6 @@ amInterested(X,Y) :-
     :   numberOfAgents(N) &
         .findall(Ag, alreadyTracking(X,Y,V,_)[source(Ag)], ListOfAnswerers) &
         .length(ListOfAnswerers,N-1) &
-        .print("alreadyTracking: sto confrontando il numero di risposte con", N-1) &
         not alreadyTracking(X,Y,true,_) &
         .findall(I, alreadyTracking(X,Y,_,true)[source(I)], ListOfInterested) &
         .print("ListOfInterested=", ListOfInterested) &

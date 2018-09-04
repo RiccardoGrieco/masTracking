@@ -1,5 +1,7 @@
 import jason.asSemantics.Agent;
 import jason.asSyntax.*;
+import jason.bb.BeliefBase;
+import jason.bb.DefaultBeliefBase;
 import jason.environment.Environment;
 import jason.environment.grid.Location;
 
@@ -81,6 +83,8 @@ public final class HouseEnv extends Environment {
     @Override
     public void init(String[] args) {
 
+        getEnvironmentInfraTier().getRuntimeServices()
+
         targetsRecentlyNotified = new ForgetfulSet<Target>();
         losingTargetsRecentlyNotified = new ForgetfulSet<AgentModel>();
         
@@ -96,8 +100,8 @@ public final class HouseEnv extends Environment {
 
         setCameraAgentsNoNeighbors();
 
-
-
+        AgentModel agentModel=new AgentModel();
+        
         //INIT MODEL AGENTS
 
         List<AgentModel> agents = initCameraAgentsPositionsModel();
@@ -149,18 +153,21 @@ public final class HouseEnv extends Environment {
             JSONObject obj= agentsJSON.getJSONObject(i);
             AgentModel camera=null;
             for (AgentModel agent  : agents) {
+                System.out.println(agent.getClass().getName()); //TODO jdnjdfndfjnf
                 if(agent.getName().equalsIgnoreCase(obj.getString("name"))){
                     camera=agent;
                     break;
                 }
             }
             List<Point> points=new ArrayList<>();
-            camera.setShadowZones(points);
+            
             JSONArray pointArray= obj.getJSONArray("shadowZones");
             for (int j = 0; j < pointArray.length(); j++) {
                 JSONObject pointObj=pointArray.getJSONObject(j);
                 points.add(new Point(pointObj.getInt("x"), pointObj.getInt("y")));
             }
+
+            camera.setShadowZones(points);
         }
 
     }
@@ -178,7 +185,10 @@ public final class HouseEnv extends Environment {
             String name=agent.getString("name");
             int x=pos.getInt("x");
             int y=pos.getInt("y");
-            agents.add(new AgentModel.CameraAgent(name,x,y));
+            AgentModel ag = new AgentModel.CameraAgent(name,x,y);
+            ag.setBB(new DefaultBeliefBase());
+            if(ag.getBB() == null) System.out.println("Strunz, e' asciuto nall");
+            agents.add(ag);
         }
 
         return agents;
@@ -220,6 +230,7 @@ public final class HouseEnv extends Environment {
             tracker = model.getInverseAgentsTrackingMap().get(target);    // agent who is tracking target
 
             if(tracker != null) {
+                System.out.println("Il target " + target.getId() + "è tracciato");
                 // ** TRACKING **
                 // update tracking percept in agent's BB
                 addPercept(tracker.getName(), 
@@ -238,15 +249,17 @@ public final class HouseEnv extends Environment {
                     // A camera agent percepts a target if and only if the target is in
                     // the camera view zone and the camera is not tracking it yet.
                     if(camViewZone.contains(targetPos.x, targetPos.y) && 
-                            ! model.isAlreadyTracking(agent, target))
+                            ! model.isAlreadyTracking(agent, target)){
+                        System.out.println("L'agente " + agent.getName() + " ha trovato il target " + target.getId());
                         addPercept(agent.getName(), 
                             Literal.parseLiteral("target(" + targetPos.x + ", " + targetPos.y + ")"));
+                    }
                 }
             }
 
             targetsRecentlyNotified.add(target);
         }
-        
+
         for(AgentModel cam : model.getCameraAgents()) {
 
             if(losingTargetsRecentlyNotified.contains(cam)) continue;
@@ -255,6 +268,7 @@ public final class HouseEnv extends Environment {
 
             // ** LOOSING TARGET **
             if(isLosingItsTarget(cam)) {
+                System.out.println("Sono entrato nell'if isLosingItsTarget: agente " + cam.getName());
                 Target target = model.getAgentsTrackingMap().get(cam);
 
                 addPercept(cam.getName(), 
@@ -283,13 +297,18 @@ public final class HouseEnv extends Environment {
         // manage tracking changes
         for(AgentModel agent : model.getCameraAgents()) {
             try {
-                itLiteral = agent.getBB().getCandidateBeliefs(new PredicateIndicator("tracking", 4));
+                BeliefBase bb = agent.getBB();
+                PredicateIndicator pi = new PredicateIndicator("target", 2);
+                if(bb == null) System.out.println("BB = null");
+                itLiteral = bb.getCandidateBeliefs(pi);
+                if(itLiteral == null) System.out.println("itLiteral e' null");
             }
             catch(NullPointerException e) {
+                System.out.println("NullPointerEx: non trovo tracking");
                 continue;   // predicate not found: go to next agent.
             }
-
-            if(itLiteral.hasNext()) {
+            
+            if(itLiteral!=null && itLiteral.hasNext()) {
                 Literal lit = itLiteral.next();
                 String name = lit.getTermsArray()[0].toString();
                 int progressive = Integer.valueOf(lit.getTermsArray()[1].toString());
@@ -297,6 +316,7 @@ public final class HouseEnv extends Environment {
                 for(Target target : model.getTargets()) {
                     if(name.equals(target.getIdAgent()) && target.getProgressiveNumber() == progressive) {
                         model.getAgentsTrackingMap().put(agent, target);
+                        System.out.println("Ho aggiunto nella mappa in updateModel");
                         model.getInverseAgentsTrackingMap().put(target, agent);
                         freeTargets.remove(target);
                     }
@@ -312,10 +332,11 @@ public final class HouseEnv extends Environment {
                     itLiteral = agent.getBB().getCandidateBeliefs(new PredicateIndicator("tracking", 4));
                 }
                 catch(NullPointerException e) {
+                    System.out.println("NullPointerEx: non trovo tracking");
                     continue;   // predicate not found: go to next agent.
                 }
                 // if agent is tracking someone
-                if(itLiteral.hasNext()) {
+                if(itLiteral!=null && itLiteral.hasNext()) {
                     Literal lit = itLiteral.next();
 
                     // take tracking position
@@ -327,6 +348,7 @@ public final class HouseEnv extends Environment {
 
                     // target is properly the target tracked by agent
                     model.getAgentsTrackingMap().put(agent, target);
+                    System.out.println("Ho aggiunto nella mappa in updateModel2");
                     model.getInverseAgentsTrackingMap().put(target, agent);
                     freeTargets.remove(target);
                     tracked = true;
@@ -367,27 +389,31 @@ public final class HouseEnv extends Environment {
     private boolean isLosingItsTarget(AgentModel agent) {
         // tracking check
         Target tracked = model.getAgentsTrackingMap().get(agent);
-        System.out.println("Agente " + agent.getName() + " VZ " + agent.getViewZone());
-        System.out.println("Agente " + agent.getName() + " VZ " + agent.getViewZone().getBounds());
-        if(tracked==null)
+        //System.out.println("Agente " + agent.getName() + " VZ " + agent.getViewZone());
+        //System.out.println("Agente " + agent.getName() + " VZ " + agent.getViewZone().getBounds());
+        if(tracked == null) {
             return false;
+        }
 
         // target at border check
         Location trackedLocation = tracked.getPosition();
         Rectangle viewZone = agent.getViewZone();
-        
-        if(trackedLocation.x <= viewZone.x && trackedLocation.x != viewZone.x+viewZone.width ||
-            trackedLocation.y!=viewZone.y || trackedLocation.y!=viewZone.y+viewZone.height)
-            return false;
+        Point trackedPosition = new Point(trackedLocation.x, trackedLocation.y);
 
-        // delta time check
-        Long lastTimeLosing = losing.get(agent);
-        long currentTimeMillis = System.currentTimeMillis();
-        if(lastTimeLosing!=null && currentTimeMillis-lastTimeLosing<DELTA_TIME_LOSING) return false;
+        for(Point point : agent.getshadowZones()){
+            if(point.equals(trackedPosition)) {
+                // delta time check
+                Long lastTimeLosing = losing.get(agent);
+                long currentTimeMillis = System.currentTimeMillis();
+                if(lastTimeLosing!=null && currentTimeMillis-lastTimeLosing<DELTA_TIME_LOSING) return false;
 
-        losing.put(agent, currentTimeMillis);
+                losing.put(agent, currentTimeMillis);
+                System.out.println("Sto per ritornare true! isLosingTarget");
+                return true;
+            }
+        }
 
-        return true;
+        return false;
     }
 
 
@@ -468,5 +494,30 @@ public final class HouseEnv extends Environment {
             int x=obj.getInt("noNeighbors");
             addPercept(obj.getString("name"),Literal.parseLiteral("noNeighbors("+x+")"));
         }
+
+/*
+        // Room 1 (up-sx)
+        addPercept("camera1", Literal.parseLiteral("noNeighbors(4)"));
+        addPercept("camera2", Literal.parseLiteral("noNeighbors(5)"));
+        addPercept("camera3", Literal.parseLiteral("noNeighbors(5)"));
+        addPercept("camera4", Literal.parseLiteral("noNeighbors(6)"));
+
+        // Room 2 (up-dx)
+        addPercept("camera5", Literal.parseLiteral("noNeighbors(5)"));
+        addPercept("camera6", Literal.parseLiteral("noNeighbors(4)"));
+        addPercept("camera7", Literal.parseLiteral("noNeighbors(6)"));
+        addPercept("camera8", Literal.parseLiteral("noNeighbors(5)"));
+
+        // Room 3 (down-sx)
+        addPercept("camera9", Literal.parseLiteral("noNeighbors(5)"));
+        addPercept("camera10", Literal.parseLiteral("noNeighbors(6)"));
+        addPercept("camera11", Literal.parseLiteral("noNeighbors(4)"));
+        addPercept("camera12", Literal.parseLiteral("noNeighbors(5)"));
+
+        // Room 4 (down-dx)
+        addPercept("camera13", Literal.parseLiteral("noNeighbors(6)"));
+        addPercept("camera14", Literal.parseLiteral("noNeighbors(5)"));
+        addPercept("camera15", Literal.parseLiteral("noNeighbors(5)"));
+        addPercept("camera16", Literal.parseLiteral("noNeighbors(4)"));*/
     }
 }
