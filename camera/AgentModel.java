@@ -34,6 +34,14 @@ public class AgentModel extends Agent {
         this.shadowZones = shadowZones;
     }
 
+    public boolean isInShadowZones(Location point){
+        for(Point shadow: shadowZones){
+            if (shadow.x==point.x && shadow.y==point.y)
+                return true;
+        }
+        return false;
+    }
+
     private static HouseModel model;
 
     /**
@@ -41,12 +49,8 @@ public class AgentModel extends Agent {
      */
 
      public AgentModel(){
+         canMove=false;
      }
-    public AgentModel(String n, int x, int y, boolean canM) {
-        name = n;
-        position = new Location(x, y);
-        canMove = canM;
-    }
 
     public boolean equals(Object other) {
         AgentModel otherA = (AgentModel) other;
@@ -127,7 +131,7 @@ public class AgentModel extends Agent {
          * Constructor.
          */
         public MovingAgent(String name, int x, int y, List<Location> cp){
-            super(name, x, y, true);
+            //super(name, x, y, true);
 
             checkpoints = cp;
             checkpointsIterator = cp.iterator();

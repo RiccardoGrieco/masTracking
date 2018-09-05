@@ -100,11 +100,11 @@ public final class HouseEnv extends Environment {
 
         //INIT JASON AGENTS
 
-       /* initCameraAgentsPositions();
+        initCameraAgentsPositions();
 
         initCameraAgentsViewZones();
 
-        setCameraAgentsNoNeighbors();        */
+        setCameraAgentsNoNeighbors();        
 
         addPercept(Literal.parseLiteral("numberOfAgents(16)"));
 
@@ -252,7 +252,7 @@ public final class HouseEnv extends Environment {
                     // ** TARGET **
                     // A camera agent percepts a target if and only if the target is in
                     // the camera view zone and the camera is not tracking it yet.
-                    if(camViewZone.contains(targetPos.x, targetPos.y) && 
+                    if((camViewZone.contains(targetPos.x, targetPos.y) || agent.isInShadowZones(targetPos))&& 
                             ! model.isAlreadyTracking(agent, target)){
                         System.out.println("L'agente " + agent.getName() + " ha trovato il target " + target.getId());
                         addPercept(agent.getName(), 
@@ -304,8 +304,12 @@ public final class HouseEnv extends Environment {
                 BeliefBase bb = agent.getBB();
                 PredicateIndicator pi = new PredicateIndicator("tracking", 4);
                 if(bb == null) System.out.println("BB = null");
+                //System.out.println(bb.toString());
                 itLiteral = bb.getCandidateBeliefs(pi);
-                if(itLiteral == null) System.out.println("itLiteral e' null");
+                if(itLiteral != null){
+                    
+                    System.out.println("itLiteral NON null");
+                }
             }
             catch(NullPointerException e) {
                 System.out.println("NullPointerEx: non trovo tracking");
