@@ -1,3 +1,5 @@
+package internalActions;
+
 import jason.*;
 import jason.asSyntax.*;
 import jason.bb.BeliefBase;

@@ -74,7 +74,7 @@ public final class HouseView extends GridWorldView{
             drawTarget(g, x, y);
             break;
 
-            case AgentModel.CameraAgent.CAMERA:
+            case AgentModel.CAMERA:
             drawCamera(g,x,y);
             break;
 

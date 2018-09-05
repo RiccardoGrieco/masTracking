@@ -187,7 +187,7 @@ amInterested(X,Y) :-
 
 // Place a bid for a target.
 +!placeBid(Ag, Tid, X, Y)[source(S)]
-    <-  auction.calculateBid(X, Y, B);
+    <-  internalActions.calculateBid(X, Y, B);
         .print("My bid for auction ",Ag,"-",Tid," is: ", B);
         .send(S, tell, bid(Ag, Tid,B)).
 

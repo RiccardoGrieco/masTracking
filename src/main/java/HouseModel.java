@@ -279,7 +279,7 @@ public class HouseModel extends GridWorldModel{
 
     private void registerCamera(){
         for (AgentModel agent : cameraAgents) {
-            add(AgentModel.CameraAgent.CAMERA, agent.getPosition());
+            add(AgentModel.CAMERA, agent.getPosition());
             initYellowBoxes(agent);
             
         }

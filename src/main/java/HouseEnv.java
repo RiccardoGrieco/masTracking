@@ -25,6 +25,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import internalActions.*;
+
 public final class HouseEnv extends Environment {
 
     public static class ForgetfulSet<T> extends HashSet<T> {
@@ -83,7 +85,6 @@ public final class HouseEnv extends Environment {
     @Override
     public void init(String[] args) {
 
-        getEnvironmentInfraTier().getRuntimeServices()
 
         targetsRecentlyNotified = new ForgetfulSet<Target>();
         losingTargetsRecentlyNotified = new ForgetfulSet<AgentModel>();
@@ -104,17 +105,19 @@ public final class HouseEnv extends Environment {
         
         //INIT MODEL AGENTS
 
-        List<AgentModel> agents = initCameraAgentsPositionsModel();
+        /*List<AgentModel> agents = initCameraAgentsPositionsModel();
+
+        System.out.println("Lunghezza lista: " + agents.size());
 
         initCameraAgentsShadowZone(agents);
 
         initCameraAgentsViewZonesModel(agents); //TODO
 
+        */
 
+        addPercept(Literal.parseLiteral("numberOfAgents(16)"));
 
-        addPercept(Literal.parseLiteral("numberOfAgents(" + agents.size() + ")"));
-
-        model = new HouseModel(agents, args[1], args[2]);
+        model = new HouseModel(new LinkedList<>(), args[1], args[2]);
 
 
         if (args[0].equals("gui")) {
@@ -178,17 +181,23 @@ public final class HouseEnv extends Environment {
      * 
      */
     List<AgentModel> initCameraAgentsPositionsModel(){
-        List<AgentModel> agents = new LinkedList<>();
+        List<AgentModel> agents = internalActions.firstAction.AGENTS_LIST;
+
         for (int i = 0; i < agentsJSON.length(); i++) {
-            JSONObject agent=agentsJSON.getJSONObject(i);
-            JSONObject pos=agent.getJSONObject("position");
-            String name=agent.getString("name");
+            JSONObject agentJSON = agentsJSON.getJSONObject(i);
+            JSONObject pos = agentJSON.getJSONObject("position");
+            String name = agentJSON.getString("name");
             int x=pos.getInt("x");
             int y=pos.getInt("y");
-            AgentModel ag = new AgentModel.CameraAgent(name,x,y);
-            ag.setBB(new DefaultBeliefBase());
-            if(ag.getBB() == null) System.out.println("Strunz, e' asciuto nall");
-            agents.add(ag);
+
+            for(AgentModel agent : agents) {
+                if(agent.getName().equalsIgnoreCase(name)) 
+                    agent.setLocation(new Location(x, y));
+            }
+
+            //AgentModel ag = new AgentModel(name,x,y);
+            //ag.setBB(new DefaultBeliefBase());
+            //agents.add(ag);
         }
 
         return agents;

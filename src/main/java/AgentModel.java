@@ -15,6 +15,8 @@ public class AgentModel extends Agent {
     private boolean canMove;
     private int radius;
 
+    public static final int CAMERA = 32;
+
     private List<Point> shadowZones;
 
     /**
@@ -103,22 +105,6 @@ public class AgentModel extends Agent {
 
 
     /* ----------------- INNER CLASSES ----------------- */
-
-
-    /**
-     * A camera agent can track a target and speak to other agents.
-     */
-    public static final class CameraAgent extends AgentModel {
-        public static final int CAMERA = 32;
-
-        public CameraAgent(){
-            System.out.println("Prova"); //TODO
-        }
-
-        public CameraAgent(String name, int x, int y){
-            super(name, x, y, false);
-        }        
-    }
     
     /**
      * A moving agent can do what a camera agent can do, but also he moves!

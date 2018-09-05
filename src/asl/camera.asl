@@ -14,6 +14,9 @@
 /* Initial beliefs and rules */
 
 /* Initial goals */
++!doFirstAction
+    :   true
+    <-  internalActions.firstAction.
 
 
 /* Plans */
