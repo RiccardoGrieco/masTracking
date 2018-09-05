@@ -1,3 +1,4 @@
+package camera;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.io.BufferedReader;

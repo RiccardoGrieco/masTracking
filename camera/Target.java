@@ -1,3 +1,4 @@
+package camera;
 import java.awt.Rectangle;
 import java.util.Iterator;
 import java.util.List;

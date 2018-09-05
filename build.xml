@@ -14,23 +14,21 @@
 
     <property name="mas2j.project.file" value="masTracking.mas2j"/>
     <property name="debug" value=""/> <!-- use "-debug" to run in debug mode -->
-    <property name="build.dir" value="${basedir}/target/classes" />
-    <property name="library.dir" value="C:\Users\marco\.m2\repository"/>
+    <property name="build.dir" value="${basedir}/bin/classes" />
+    <property name="library.dir" value="C:\Users\user\.m2\repository"/>
     <property name="resource.dir" value="${basedir}\src\main\resources"/>
 
     <!--Dipendenze prese con maven -->
     <property name="jasonJar" value="${library.dir}\net\sf\jason\jason\2.2\jason-2.2.jar"/>
     <property name="jsonJar" value="${library.dir}\org\json\json\20180130\json-20180130.jar"/>
-    <property name="jgraphtJar" value="${library.dir}\org\jgrapht\jgrapht-core\1.2.0\jgrapht-core-1.2.0.jar"/>
-    <property name="jasonJar" value="${library.dir}\net\sf\jason\jason\2.2\jason-2.2.jar"/>
-
+    <property name="jgraphJar" value="${library.dir}\org\jgrapht\jgrapht-core\1.2.0\jgrapht-core-1.2.0.jar"/>
 
     <path id="project.classpath">
         <pathelement location="${basedir}"/>
         <pathelement location="${build.dir}"/>
         <pathelement location="${jasonJar}"/>
         <pathelement location="${jsonJar}"/>
-        <pathelement location="${jgraphtJar}"/>
+        <pathelement location="${jgraphJar}"/>
         <pathelement location="${exec.dir}"/>
 
     </path>
@@ -51,6 +49,7 @@
         <condition property="srcdir" value="${basedir}/src/java" else="${basedir}" >
             <available file="${basedir}/src/java" />
         </condition>
+
         <javac srcdir="${srcdir}" destdir="${build.dir}" debug="true" optimize="true" includeantruntime="false" >
             <classpath refid="project.classpath"/>
         </javac>

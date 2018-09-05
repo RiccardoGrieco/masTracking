@@ -13,10 +13,12 @@
 
 /* Initial beliefs and rules */
 
+doFirstAction.
+
 /* Initial goals */
-+!doFirstAction
-    :   true
-    <-  internalActions.firstAction.
++doFirstAction
+    <-   camera.firstAction.
+
 
 
 /* Plans */

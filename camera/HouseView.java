@@ -1,3 +1,4 @@
+package camera;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -38,7 +39,7 @@ public final class HouseView extends GridWorldView{
         loadTexture();
     }
 
-    HouseView(HouseModel model){
+    public HouseView(HouseModel model){
         super(model, TITLE, WINDOW_SIZE);
 
         //Bind to model

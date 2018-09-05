@@ -1,9 +1,11 @@
+package camera;
 import jason.asSemantics.Agent;
 import jason.asSyntax.*;
 import jason.bb.BeliefBase;
 import jason.bb.DefaultBeliefBase;
 import jason.environment.Environment;
 import jason.environment.grid.Location;
+import jason.stdlib.foreach;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -12,7 +14,6 @@ import java.util.logging.Logger;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import java.util.Map;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -25,7 +26,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import internalActions.*;
 
 public final class HouseEnv extends Environment {
 
@@ -81,10 +81,15 @@ public final class HouseEnv extends Environment {
     //Agents Descriptions
     private JSONArray agentsJSON;
 
+    private String[] initArgs;
+
 
     @Override
     public void init(String[] args) {
 
+       firstAction.env=this;
+
+       initArgs=args;
 
         targetsRecentlyNotified = new ForgetfulSet<Target>();
         losingTargetsRecentlyNotified = new ForgetfulSet<AgentModel>();
@@ -95,37 +100,33 @@ public final class HouseEnv extends Environment {
 
         //INIT JASON AGENTS
 
-        initCameraAgentsPositions();
+       /* initCameraAgentsPositions();
 
         initCameraAgentsViewZones();
 
-        setCameraAgentsNoNeighbors();
+        setCameraAgentsNoNeighbors();        */
 
-        AgentModel agentModel=new AgentModel();
-        
+        addPercept(Literal.parseLiteral("numberOfAgents(16)"));
+
+     //   updatePercepts();
+    }
+
+    public void setUpModel_View(){
         //INIT MODEL AGENTS
 
-        /*List<AgentModel> agents = initCameraAgentsPositionsModel();
-
-        System.out.println("Lunghezza lista: " + agents.size());
+        List<AgentModel> agents = initCameraAgentsPositionsModel();
 
         initCameraAgentsShadowZone(agents);
 
         initCameraAgentsViewZonesModel(agents); //TODO
 
-        */
-
-        addPercept(Literal.parseLiteral("numberOfAgents(16)"));
-
-        model = new HouseModel(new LinkedList<>(), args[1], args[2]);
+        model = new HouseModel(agents, initArgs[1], initArgs[2]);
 
 
-        if (args[0].equals("gui")) {
+        if (initArgs[0].equals("gui")) {
            HouseView view = new HouseView(model);
            model.setView(view);
         }
-
-        System.out.println("World initialized.");
 
         updatePercepts();
     }
@@ -156,7 +157,6 @@ public final class HouseEnv extends Environment {
             JSONObject obj= agentsJSON.getJSONObject(i);
             AgentModel camera=null;
             for (AgentModel agent  : agents) {
-                System.out.println(agent.getClass().getName()); //TODO jdnjdfndfjnf
                 if(agent.getName().equalsIgnoreCase(obj.getString("name"))){
                     camera=agent;
                     break;
@@ -181,7 +181,6 @@ public final class HouseEnv extends Environment {
      * 
      */
     List<AgentModel> initCameraAgentsPositionsModel(){
-        List<AgentModel> agents = internalActions.firstAction.AGENTS_LIST;
 
         for (int i = 0; i < agentsJSON.length(); i++) {
             JSONObject agentJSON = agentsJSON.getJSONObject(i);
@@ -189,18 +188,14 @@ public final class HouseEnv extends Environment {
             String name = agentJSON.getString("name");
             int x=pos.getInt("x");
             int y=pos.getInt("y");
-
-            for(AgentModel agent : agents) {
+            for(AgentModel agent : firstAction.AGENTS_LIST) {
                 if(agent.getName().equalsIgnoreCase(name)) 
                     agent.setLocation(new Location(x, y));
             }
 
-            //AgentModel ag = new AgentModel(name,x,y);
-            //ag.setBB(new DefaultBeliefBase());
-            //agents.add(ag);
         }
 
-        return agents;
+        return  firstAction.AGENTS_LIST;
     }
 
     /**
@@ -307,7 +302,7 @@ public final class HouseEnv extends Environment {
         for(AgentModel agent : model.getCameraAgents()) {
             try {
                 BeliefBase bb = agent.getBB();
-                PredicateIndicator pi = new PredicateIndicator("target", 2);
+                PredicateIndicator pi = new PredicateIndicator("tracking", 4);
                 if(bb == null) System.out.println("BB = null");
                 itLiteral = bb.getCandidateBeliefs(pi);
                 if(itLiteral == null) System.out.println("itLiteral e' null");
@@ -428,7 +423,45 @@ public final class HouseEnv extends Environment {
 
     @Override
     public boolean executeAction(String ag, Structure action) {
-       return true;
+        AgentModel agent = null;
+        Target target = null;
+        Location targetLoc = null;
+        boolean result = false;
+
+        System.out.println("Esegue executeAction");
+        System.out.println("ag: "  + ag + " action: " + action.toString());
+
+        if(action.getFunctor().equals("track")) {
+            for(AgentModel agS : model.getCameraAgents()) {
+                if(agS.getName().equals(ag)) agent = agS; 
+            }
+
+            targetLoc = new Location(Integer.valueOf(action.getTerms().get(2).toString()), 
+                Integer.valueOf(action.getTerms().get(3).toString()));
+
+            for(Target tar : model.getTargets()) {
+                if(targetLoc.equals(tar.getPosition())) target = tar;
+            }
+
+            model.getAgentsTrackingMap().put(agent, target);
+            model.getInverseAgentsTrackingMap().put(target, agent);
+
+            addPercept(agent.getName(), 
+                Literal.parseLiteral("tracking(" + 
+                action.getTerms().get(0).toString() + ", "+
+                action.getTerms().get(1).toString() + ", "+
+                action.getTerms().get(2).toString() + ", "+
+                action.getTerms().get(3).toString() +
+                ")"));
+            result = true;
+        }
+        else if(action.getFunctor().equals("observeTarget")) {
+            result = true;
+        }
+
+        if(result) updatePercepts();
+        
+        return result;
     }
 
     /**

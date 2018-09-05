@@ -1,3 +1,4 @@
+package camera;
 import jason.architecture.*;
 import jason.asSemantics.Agent;
 import jason.environment.grid.Location;
@@ -40,7 +41,6 @@ public class AgentModel extends Agent {
      */
 
      public AgentModel(){
-         System.out.println("creazione standard");
      }
     public AgentModel(String n, int x, int y, boolean canM) {
         name = n;
@@ -82,6 +82,13 @@ public class AgentModel extends Agent {
 
     public String getName() {
         return name;
+    }
+
+    /**
+     * @param name the name to set
+     */
+    public void setName(String name) {
+        this.name = name;
     }
 
     public Location getPosition() {

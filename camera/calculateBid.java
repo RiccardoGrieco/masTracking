@@ -1,5 +1,4 @@
-package internalActions;
-
+package camera;
 import jason.*;
 import jason.asSyntax.*;
 import jason.bb.BeliefBase;

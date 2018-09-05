@@ -10,6 +10,8 @@ progressiveNo(1).
 /* RULES */
 
 //losingTarget(X) :- ; //TODO
+observeTarget(Name,Tid,X,Y) :-
+    tracking(Name,Tid,X,Y).
 
 amInterested(X,Y) :- 
     canSee(X1, Y1, X2, Y2) &
@@ -187,7 +189,7 @@ amInterested(X,Y) :-
 
 // Place a bid for a target.
 +!placeBid(Ag, Tid, X, Y)[source(S)]
-    <-  internalActions.calculateBid(X, Y, B);
+    <-  calculateBid(X, Y, B);
         .print("My bid for auction ",Ag,"-",Tid," is: ", B);
         .send(S, tell, bid(Ag, Tid,B)).
 
@@ -264,7 +266,8 @@ amInterested(X,Y) :-
         //.max(ListOfInterested, Max) &
         //.print("alreadyTracking: Max=", Max) & 
         //Max<=Name 
-    <-  +tracking(Name, Tid, X, Y);
+    <-//  +tracking(Name, Tid, X, Y);
+         track(Name, Tid, X, Y);
         .print("No one is interested about the target, I start to track the target!");
         -progressiveNo(Tid);
         +progressiveNo(Tid+1).
