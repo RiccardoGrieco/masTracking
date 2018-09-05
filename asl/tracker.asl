@@ -15,7 +15,7 @@ observeTarget(Name,Tid,X,Y) :-
 
 amInterested(X,Y) :- 
     canSee(X1, Y1, X2, Y2) &
-    X>=X1 & X<=X2 & Y>=Y1 & Y<=Y2.
+    X>=X1 & X<=X2 & Y>=Y2 & Y<=Y1. //TODO inverted Y-axis
 
 //isFree :- not tracking(_,_,_,_).
 
@@ -267,6 +267,7 @@ amInterested(X,Y) :-
         //.print("alreadyTracking: Max=", Max) & 
         //Max<=Name 
     <-//  +tracking(Name, Tid, X, Y);
+        .abolish(alreadyTracking(X,Y,_,_));
          track(Name, Tid, X, Y);
         .print("No one is interested about the target, I start to track the target!");
         -progressiveNo(Tid);
@@ -286,6 +287,7 @@ amInterested(X,Y) :-
         .print("alreadyTracking: Max=", Max) & 
         Max<=Name 
     <-  +tracking(Name, Tid, X, Y);
+        .abolish(alreadyTracking(X, Y, _, _);
         .print("Someone is interested about the target, but I win and I start to track the target!");
         -progressiveNo(Tid);
         +progressiveNo(Tid+1).

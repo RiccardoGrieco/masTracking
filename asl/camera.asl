@@ -17,7 +17,8 @@ doFirstAction.
 
 /* Initial goals */
 +doFirstAction
-    <-   camera.firstAction.
+    <-  -doFirstAction; 
+        camera.firstAction.
 
 
 
