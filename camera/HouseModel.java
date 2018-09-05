@@ -257,15 +257,21 @@ public class HouseModel extends GridWorldModel{
                 int count=0;
                 while(count<MAX_TARGET){
                     try {
-                        Target newTarget = new Target();
 
-                        targets.add(newTarget);
-                        System.out.println("A wild target appears in position (" + 
-                            newTarget.getPosition() + ")!");
+                        synchronized(Target.BLOCK_LIST){
+                            Target newTarget = new Target();
 
-                        //Create a new target and inform view
-                        add(Target.TARGET, newTarget.getPosition());
-                        count++;
+                            targets.add(newTarget);
+                            System.out.println("A wild target appears in position (" + 
+                                newTarget.getPosition() + ")!");
+
+                            //Create a new target and inform view
+                            add(Target.TARGET, newTarget.getPosition());
+                            count++;
+
+                            Target.BLOCK_LIST.add(newTarget);
+                            Target.BLOCK_LIST.notify();
+                        }
 
                         //take a long nap
                         Thread.sleep(10000);

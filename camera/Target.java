@@ -1,12 +1,16 @@
 package camera;
 import java.awt.Rectangle;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 import jason.environment.grid.Location;
 
 public final class Target{
+
+    public static final LinkedList<Target> BLOCK_LIST=new LinkedList<>();
+
     //Id Target
     private static int count=0;
     private final int id;
@@ -50,10 +54,24 @@ public final class Target{
     }
 
     //Actual position and next target to be reached
-    private Location position, destination;
+    private Location position, oldPosition, destination;
 
     public Location getPosition() {
         return position;
+    }
+
+    /**
+     * @return the oldPosition
+     */
+    public Location getOldPosition() {
+        return oldPosition;
+    }
+
+    /**
+     * @param oldPosition the oldPosition to set
+     */
+    public void setOldPosition(Location oldPosition) {
+        this.oldPosition = oldPosition;
     }
 
     public String getIdAgent() {
@@ -80,8 +98,12 @@ public final class Target{
                     e.printStackTrace();
                 }
             }
+            synchronized(BLOCK_LIST){
+                BLOCK_LIST.add(this);
+                BLOCK_LIST.notify();
+            }
             model.updateTarget(position, next);     // For view
-
+            oldPosition=position;
             position = next;
         }
         else

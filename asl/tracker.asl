@@ -10,8 +10,8 @@ progressiveNo(1).
 /* RULES */
 
 //losingTarget(X) :- ; //TODO
-observeTarget(Name,Tid,X,Y) :-
-    tracking(Name,Tid,X,Y).
+//observeTarget(Name,Tid,X,Y) :-
+  //  tracking(Name,Tid,X,Y).
 
 amInterested(X,Y) :- 
     canSee(X1, Y1, X2, Y2) &
@@ -24,8 +24,8 @@ amInterested(X,Y) :-
 /* Plans */
 
 //TODO implement in Agent class?
-+tracking(Ag, Tid, X, Y)
-    :   tracking(Ag, Tid, Xprev, Yprev) & (X\==Xprev | Y\==Yprev)
++tracking(Ag, Tid, X, Y)[source(_)]
+    :   tracking(Ag, Tid, Xprev, Yprev)[source(_)] & (X\==Xprev | Y\==Yprev)
     <-  -tracking(Ag, Tid, Xprev, Yprev).
 
 /*------------------------ Auctioneer ------------------------*/
@@ -287,7 +287,7 @@ amInterested(X,Y) :-
         .print("alreadyTracking: Max=", Max) & 
         Max<=Name 
     <-  +tracking(Name, Tid, X, Y);
-        .abolish(alreadyTracking(X, Y, _, _);
+        .abolish(alreadyTracking(X, Y, _, _));
         .print("Someone is interested about the target, but I win and I start to track the target!");
         -progressiveNo(Tid);
         +progressiveNo(Tid+1).
