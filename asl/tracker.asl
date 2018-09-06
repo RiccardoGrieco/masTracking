@@ -267,6 +267,7 @@ amInterested(X,Y) :-
         //.print("alreadyTracking: Max=", Max) & 
         //Max<=Name 
     <-//  +tracking(Name, Tid, X, Y);
+        -target(X, Y);
         .abolish(alreadyTracking(X,Y,_,_));
          track(Name, Tid, X, Y);
         .print("No one is interested about the target, I start to track the target!");
@@ -286,7 +287,8 @@ amInterested(X,Y) :-
         .max(ListOfInterested, Max) &
         .print("alreadyTracking: Max=", Max) & 
         Max<=Name 
-    <-  +tracking(Name, Tid, X, Y);
+    <-  -target(X, Y);
+        +tracking(Name, Tid, X, Y);
         .abolish(alreadyTracking(X, Y, _, _));
         .print("Someone is interested about the target, but I win and I start to track the target!");
         -progressiveNo(Tid);
