@@ -99,12 +99,13 @@ public final class Target{
                 }
             }
             synchronized(BLOCK_LIST){
+                oldPosition=position;
+                position = next;
                 BLOCK_LIST.add(this);
                 BLOCK_LIST.notify();
             }
             model.updateTarget(position, next);     // For view
-            oldPosition=position;
-            position = next;
+            
         }
         else
             destination=null;

@@ -306,8 +306,6 @@ public final class HouseEnv extends Environment {
                         System.out.println("L'agente " + agent.getName() + " ha trovato il target " + target.getId());
                         addPercept(agent.getName(), 
                             Literal.parseLiteral("target(" + targetPos.x + ", " + targetPos.y + ")"));
-                    }else{
-                        System.out.println("uallera"); //TODO togli
                     }
                 }
             }
