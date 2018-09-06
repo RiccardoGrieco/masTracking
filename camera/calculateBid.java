@@ -24,7 +24,7 @@ public class calculateBid extends DefaultInternalAction {
                 agentYCoord = 0.0,
                 trackedXCoord = 0.0,
                 trackedYCoord = 0.0,
-                noNeightbors = 0.0,
+                noNeighbors = 0.0,
                 cost = 0.0,
                 dist = 0.0,
                 dist2 = 0.0;
@@ -34,19 +34,19 @@ public class calculateBid extends DefaultInternalAction {
         // retrieves agent's no. neightbors
         itLiteral = agentBB.getCandidateBeliefs(new PredicateIndicator("noNeighbors", 1));
         tmpLiteral = itLiteral.next();
-        //tmpLiteral = agentBB.contains(Literal.parseLiteral("noNeightbors(1)"));
+        //tmpLiteral = agentBB.contains(Literal.parseLiteral("noNeighbors(1)"));
         try {
-            noNeightbors = Double.valueOf(tmpLiteral.getTermsArray()[0].toString());
+            noNeighbors = Double.valueOf(tmpLiteral.getTermsArray()[0].toString());
         }
         catch(ArrayIndexOutOfBoundsException e) {
             throw new Exception("ERROR in internal action 'calculateBid': " 
-                + "agent '" + agent + "' has literal 'noNeightbors' in BB with no arguments!");
+                + "agent '" + agent + "' has literal 'noNeighbors' in BB with no arguments!");
         }
 
         // retrieves agent's coordinates
         itLiteral = agentBB.getCandidateBeliefs(new PredicateIndicator("myPosition", 2));
         tmpLiteral = itLiteral.next();
-        //tmpLiteral = agentBB.contains(Literal.parseLiteral("myPosition(X, Y)"));
+        
         try {
             agentXCoord = Double.valueOf(tmpLiteral.getTermsArray()[0].toString());
             agentYCoord = Double.valueOf(tmpLiteral.getTermsArray()[1].toString());
@@ -68,17 +68,19 @@ public class calculateBid extends DefaultInternalAction {
 
                 NumberTerm targetXCoord = (NumberTerm) args[0];
                 NumberTerm targetYCoord = (NumberTerm) args[1];
+
+                // retrieves actual target's coords
+                itLiteral = agentBB.getCandidateBeliefs(new PredicateIndicator("tracking", 4));
                 
-                if(agentIsFree) {
+                
+                // if agent is free
+                if(itLiteral == null) {
                     dist = euclideanDistance(agentXCoord, agentYCoord, targetXCoord.solve(), targetYCoord.solve());
-                    cost = ((1/dist) + K) / noNeightbors;
+                    cost = ((1/dist) + K) / noNeighbors;
                 }
                 else {
-
-                    // retrieves actual target's coords
-                    itLiteral = agentBB.getCandidateBeliefs(new PredicateIndicator("tracking", 4));
                     tmpLiteral = itLiteral.next();
-                    //tmpLiteral = agentBB.contains(Literal.parseLiteral("tracking(X, Y)"));
+
                     try {
                         trackedXCoord = Double.valueOf(tmpLiteral.getTermsArray()[2].toString());
                         trackedYCoord = Double.valueOf(tmpLiteral.getTermsArray()[3].toString());
@@ -90,7 +92,7 @@ public class calculateBid extends DefaultInternalAction {
 
                     dist = euclideanDistance(agentXCoord, agentYCoord, trackedXCoord, trackedYCoord);
                     dist2 = euclideanDistance(agentXCoord, agentYCoord, targetXCoord.solve(), targetYCoord.solve());
-                    cost = ((2 * dist) - dist2 - K) / noNeightbors;
+                    cost = ((2 * dist) - dist2 - K) / noNeighbors;
                 }
             }
             else {

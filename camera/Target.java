@@ -29,6 +29,11 @@ public final class Target{
         return id == otherT.id;
     }
 
+    public String toString() {
+        return String.format("[%d %s %d %d %d]", 
+                            id, idAgent, progressiveNumber, position.x, position.y);
+    }
+
     public int hashCode() {
         return id;
     }
@@ -98,14 +103,14 @@ public final class Target{
                     e.printStackTrace();
                 }
             }
+    
+            model.updateTarget(position, next);     // For view
             synchronized(BLOCK_LIST){
                 oldPosition=position;
                 position = next;
                 BLOCK_LIST.add(this);
                 BLOCK_LIST.notify();
             }
-            model.updateTarget(position, next);     // For view
-            
         }
         else
             destination=null;
@@ -118,11 +123,11 @@ public final class Target{
         id=count++;
 
         //Add reference in the model
-        model.addTarget(this);
+        //model.addTarget(this);
 
         //Choose spawn Position
         position=chooseSpawnPosition();
-
+        
         //It's time to start walking around
         walkThread();
     }
@@ -166,7 +171,7 @@ public final class Target{
                             path=model.getAPath(position, destination);
                             pathIterator=path.iterator();
                         }
-                    Thread.sleep(1500);
+                    Thread.sleep(4000);
                     walk();
 				    } catch (Exception e) {
 					    e.printStackTrace();

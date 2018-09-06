@@ -18,7 +18,8 @@ doFirstAction.
 /* Initial goals */
 +doFirstAction
     <-  -doFirstAction; 
-        camera.firstAction.
+        .my_name(Name);
+        camera.firstAction(Name).
 
 
 

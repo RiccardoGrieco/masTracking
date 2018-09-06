@@ -55,7 +55,12 @@ public class AgentModel extends Agent {
     public boolean equals(Object other) {
         AgentModel otherA = (AgentModel) other;
 
-        return name == otherA.name;
+        return name.equals(otherA.name);
+    }
+
+    public String toString() {
+        return String.format("[%s %d %d]", 
+                            name, position.x, position.y);
     }
 
     public int hashCode() {
