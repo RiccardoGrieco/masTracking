@@ -270,7 +270,7 @@ public class HouseModel extends GridWorldModel{
                             count++;
 
                             Target.BLOCK_LIST.add(newTarget);
-                            Target.BLOCK_LIST.notify();
+                            Target.BLOCK_LIST.notifyAll();
                         }
 
                         //take a long nap

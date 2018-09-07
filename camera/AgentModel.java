@@ -35,6 +35,7 @@ public class AgentModel extends Agent {
     }
 
     public boolean isInShadowZones(Location point){
+        if(shadowZones == null) return false;
         for(Point shadow: shadowZones){
             if (shadow.x==point.x && shadow.y==point.y)
                 return true;

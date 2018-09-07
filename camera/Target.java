@@ -109,7 +109,7 @@ public final class Target{
                 oldPosition=position;
                 position = next;
                 BLOCK_LIST.add(this);
-                BLOCK_LIST.notify();
+                BLOCK_LIST.notifyAll();
             }
         }
         else
@@ -127,6 +127,9 @@ public final class Target{
 
         //Choose spawn Position
         position=chooseSpawnPosition();
+        oldPosition = null;
+
+        position = new Location(1, 1); //TODO togli
         
         //It's time to start walking around
         walkThread();
@@ -170,6 +173,8 @@ public final class Target{
                             findDestination();
                             path=model.getAPath(position, destination);
                             pathIterator=path.iterator();
+                            if(pathIterator!=null && pathIterator.hasNext())
+                                pathIterator.next();
                         }
                     Thread.sleep(4000);
                     walk();

@@ -5,6 +5,7 @@ import jason.bb.BeliefBase;
 import jason.bb.DefaultBeliefBase;
 import jason.environment.Environment;
 import jason.environment.grid.Location;
+import jason.stdlib.abolish;
 import jason.stdlib.foreach;
 
 import java.util.List;
@@ -77,9 +78,6 @@ public final class HouseEnv extends Environment {
 
     private ForgetfulSet<AgentModel> losingTargetsRecentlyNotified;
 
-    // common literals
-    public static final Literal targetPositiony  = Literal.parseLiteral("target(id,x,y)");
-
     //Logger 
     static Logger logger = Logger.getLogger(HouseEnv.class.getName());
 
@@ -143,7 +141,7 @@ public final class HouseEnv extends Environment {
 
         List<AgentModel> agents = initCameraAgentsPositionsModel();
 
-        initCameraAgentsShadowZone(agents);
+        initCameraAgentsShadowZone(agents); 
 
         initCameraAgentsViewZonesModel(agents); //TODO
 
@@ -242,7 +240,15 @@ public final class HouseEnv extends Environment {
 
         Rectangle camViewZone = null;
 
-        //clearAllPercepts();
+        clearAllPercepts();
+
+       /* initCameraAgentsPositions();
+
+        initCameraAgentsViewZones();
+
+        setCameraAgentsNoNeighbors();        
+
+        addPercept(Literal.parseLiteral("numberOfAgents(16)"));*/
 
         // non va bene: il letterale 'target' lo usiamo solo quando un agente si accorge di un target.
         /*for (Target target : model.getTargets()) {
@@ -255,6 +261,7 @@ public final class HouseEnv extends Environment {
 
         //updateTargets();
         updateModel();
+        
 
         for(Target target : model.getTargets()) {
             boolean moved = Target.BLOCK_LIST.contains(target);
@@ -264,8 +271,10 @@ public final class HouseEnv extends Environment {
             // if target is on track right now
             if(tracker != null) {
                 
-                if(target.getIdAgent()==null) continue;
-                
+                if(target.getIdAgent()==null){
+                    System.out.println("BOOOOOH");//TODO togliere
+                    continue;
+                }
                 camViewZone = tracker.getViewZone();
                 
                 // ** TRACKING **
@@ -273,6 +282,7 @@ public final class HouseEnv extends Environment {
                 boolean inShadowZones = tracker.isInShadowZones(targetPos);
                 
                 if(camViewZone.contains(targetPos.x, targetPos.y) || inShadowZones){
+                    
                     addPercept(tracker.getName(), 
                         Literal.parseLiteral("tracking(" + target.getIdAgent() + ", " + 
                         target.getProgressiveNumber() + ", " + target.getPosition().x + ", " + 
@@ -286,15 +296,15 @@ public final class HouseEnv extends Environment {
                         //while(true);//TODO forse rimettere
                     }
                 }
-                else{
+                /*else{
                     removePercept(tracker.getName(), 
                         Literal.parseLiteral("tracking(" + target.getIdAgent() + ", " + 
                         target.getProgressiveNumber() + ", _, _)"));
-                }
+                }*/
             }
 
             //if(targetsRecentlyNotified.contains(target)) continue;
-            LinkedList<AgentModel> lista = new LinkedList<>();
+            //LinkedList<AgentModel> lista = new LinkedList<>();
             for(AgentModel agent : model.getCameraAgents()) {
                 camViewZone = agent.getViewZone();
 
@@ -305,16 +315,16 @@ public final class HouseEnv extends Environment {
                     if(camViewZone.contains(targetPos.x, targetPos.y) || 
                         agent.isInShadowZones(targetPos)){
                         System.out.println("L'agente " + agent.getName() + " ha trovato il target " + target.getId());
-                        lista.add(agent);
+                        //lista.add(agent);
                         addPercept(agent.getName(), 
                             Literal.parseLiteral("target(" + targetPos.x + ", " + targetPos.y + ")"));
                     }
                 }
             }
 
-            System.out.println(lista);
-            System.out.println("Count = " + lista.size());
-            lista.clear();
+            //System.out.println(lista);
+            //System.out.println("Count = " + lista.size());
+            //lista.clear();
 
             //targetsRecentlyNotified.add(target);
         }
@@ -351,13 +361,15 @@ public final class HouseEnv extends Environment {
         List<Target> freeTargets = new ArrayList<>(model.getTargets());
         Iterator<Literal> itLiteral = null;
 
-        // clear the tracking-map cause there may be lost targets
-        Map<AgentModel, Target> agentToTracked = model.getAgentsTrackingMap();
-        Map<Target, AgentModel> trackedToAgent = model.getInverseAgentsTrackingMap();
-        agentToTracked.clear();
-        trackedToAgent.clear();
-
         synchronized(Target.BLOCK_LIST){
+            // clear the tracking-map cause there may be lost targets
+            Map<AgentModel, Target> agentToTracked = model.getAgentsTrackingMap();
+            Map<Target, AgentModel> trackedToAgent = model.getInverseAgentsTrackingMap();
+            agentToTracked.clear();
+            trackedToAgent.clear();
+
+          //  System.out.println("getTargets " + model.getTargets().toString());
+           // System.out.println("blocklist" + Target.BLOCK_LIST.toString());
             for(Target target : model.getTargets()){
                 Location loc = null;
 
@@ -391,6 +403,7 @@ public final class HouseEnv extends Environment {
                             }
                             agentToTracked.put(ag, target);
                             trackedToAgent.put(target, ag);
+                            
                             found = true;
                             break;
                         }
@@ -402,7 +415,7 @@ public final class HouseEnv extends Environment {
                     target.setProgressiveNumber(-1);
                 }
             }
-
+            //System.out.println("Mappa " + trackedToAgent.toString());
         }
 
         // manage tracking changes
