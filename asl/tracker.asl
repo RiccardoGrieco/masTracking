@@ -7,6 +7,17 @@
 //numberOfAgents(2).
 progressiveNo(1).
 
++tracking(Ag,Tid, X, Y)[source(percept)] <- +tracking(Ag, Tid, X, Y).
++tracking(Ag,Tid, X, Y)[source(self)] 
+    : tracking(Ag, Tid, XPrev, YPrev) & (XPrev\==X | YPrev\==Y)
+    <- -tracking(Ag, Tid, Xprev, YPrev). 
++numberOfAgents(N)[source(percept)] <- +numberOfAgents(N).
++noNeighbors(N)[source(percept)]<- +noNeighbors(N).
++myPosition(X,Y)[source(percept)]<- +myPosition(X,Y).
++canSee(A,B,C,D)[source(percept)]<- +canSee(A,B,C,D).
+
+
+
 /* RULES */
 
 //losingTarget(X) :- ; //TODO
@@ -24,10 +35,11 @@ amInterested(X,Y) :-
 /* Plans */
 
 //TODO implement in Agent class?
-+tracking(Ag, Tid, X, Y)[source(_)]
-    :   tracking(Ag, Tid, Xprev, Yprev)[source(_)] & (X\==Xprev | Y\==Yprev)
-    <-  -tracking(Ag, Tid, Xprev, Yprev)[source(_)].
-
+/*+tracking(Ag, Tid, X, Y)[source(percept)]
+    :   tracking(Ag, Tid, Xprev, Yprev)[source(S)] & (X\==Xprev | Y\==Yprev)
+    <-  .print("Aggiorno tracking da BB:", Ag, Tid, Xprev, Yprev, " in ", X, Y);
+        -tracking(Ag, Tid, Xprev, Yprev)[source(S)].
+*///TODO togli
 
 
 /*------------------------ Auctioneer ------------------------*/
@@ -37,8 +49,8 @@ amInterested(X,Y) :-
 */
 
 // When losing the target start an auction.
-+losingTarget(Ag, Tid, X, Y)
-    <-  -losingTarget(Ag, Tid, X, Y);
++losingTarget(Ag, Tid, X, Y)[source(percept)]
+    <- // -losingTarget(Ag, Tid, X, Y);
         .print("I'm losing my target (",X,",",Y,"), let's start an auction! Target ID: ",Ag,"-",Tid);
         .broadcast(achieve, cfp(Ag, Tid, X, Y));
         +auctionOngoing(Ag,Tid, X, Y).
@@ -113,7 +125,7 @@ amInterested(X,Y) :-
         auctionOngoing(Ag, Tid, X, Y)
     <-  .max(ListOfBids, bid(B, Winner));
         //.print("The winner of auction ", Ag, "-",Tid, " is ", Winner, " with a bid of ", B);
-        .print("The winner of auction: ", Ag, ".");
+        .print("The winner of auction: ", Winner, ".");
         //TODO get confirm
         .send(Winner, tell, winner(Ag, Tid, X, Y));
         //TODO get confirm!
@@ -125,8 +137,8 @@ amInterested(X,Y) :-
     :   Confirmation=true &
         not winner(_,_,_,_)
         //& .print("Auction for ",Ag,"-",Tid," has ended") //TODO remove this
-    <-  !clearAuction(Ag, Tid);
-        -tracking(Ag,Tid,_,_)[source(_)].
+    <-  !clearAuction(Ag, Tid);.
+        //-tracking(Ag,Tid,_,_)[source(_)].
 
 // If the winner of my auction confirms his win and I am the winner
 // of a previous auction, lose the current target and confirm my win
@@ -138,7 +150,7 @@ amInterested(X,Y) :-
     <-  +tracking(PrevAg, PrevTid, X, Y);
         !clearAuction(Ag,Tid);
         -winner(PrevAg,PrevTid,_,_)[source(S)];
-        -tracking(Ag, Tid, _,_)[source(_)];
+        //-tracking(Ag, Tid, _,_)[source(_)];
         .send(S, achieve, confirm(PrevAg, PrevTid, true)).
 
 //TODO what if the winner does not confirm?
@@ -213,7 +225,7 @@ amInterested(X,Y) :-
         & .print("Auction ongoing, I lose my target and I confirm my win.") //TODO remove this
     <-  -winner(Ag, Tid, X, Y)[source(S)];
         +tracking(Ag, Tid, X, Y);
-        -tracking(AuctionAg, AuctionTid, _, _)[source(_)];
+      //  -tracking(AuctionAg, AuctionTid, _, _)[source(_)];
         .send(S, achieve, confirm(Ag, Tid, true)).
 
 // When I'm told I'm the winner of an auction but I'm already tracking
@@ -235,13 +247,17 @@ amInterested(X,Y) :-
 
 // When I perceive a new target, ask the other agents whether
 // it's tracked by one of them.
-+target(X,Y)[source(percept)]  
-    :   not tracking(_, _, X, Y)[source(_)]
-    <-  .broadcast(achieve, tellMeTracking(X,Y)).
 
 +target(X, Y)[source(percept)]
-    :   tracking(_, _, X, Y)[source(_)]
-    <-  -target(X, Y)[source(percept)].
+    :   tracking(_, _, X, Y)[source(percept)]
+    <-  .print("aggiunto target da jason2");.
+       // -target(X, Y)[source(percept)].
+
++target(X,Y)[source(percept)]  
+    :   not tracking(_, _, X, Y)[source(percept)]
+    <-  .print("aggiunto target da jason1 (",X," ",Y,")");
+        .broadcast(achieve, tellMeTracking(X,Y)).
+
 
 // Tell another agent if I'm already tracking a target at the specified position
 // and whether I'm interested in it or not.
@@ -264,7 +280,8 @@ amInterested(X,Y) :-
         .findall(Ag, alreadyTracking(X,Y,V,_)[source(Ag)], ListOfAnswerers) &
         .length(ListOfAnswerers,N-1) &
         alreadyTracking(X,Y,true,_)[source(T)]
-    <-  -target(X,Y)[source(_)];
+    <-  .print("Non me lo prendoooo"); //TODO
+       // -target(X,Y)[source(_)];
         .abolish(alreadyTracking(X,Y,_,_)).
 
 // If all of the agents tell me they don't know the target at the
@@ -280,9 +297,10 @@ amInterested(X,Y) :-
         .length(ListOfInterested, 0) &      // se nessun altro è interessato
         progressiveNo(Tid) & .my_name(Name)
     <-//  +tracking(Name, Tid, X, Y);
-        -target(X, Y)[source(percept)];
+        .abolish(target(X, Y)); //TODO
         .abolish(alreadyTracking(X,Y,_,_));
-         track(Name, Tid, X, Y);
+        //track(Name, Tid, X, Y); //TODO
+        +tracking(Name, Tid, X, Y);
         .print("No one is interested about the target, I start to track the target!");
         -progressiveNo(Tid);
         +progressiveNo(Tid+1).
@@ -296,7 +314,7 @@ amInterested(X,Y) :-
         progressiveNo(Tid) & .my_name(Name) &
         .max(ListOfInterested, Max) &
         Max<=Name 
-    <-  -target(X, Y)[source(_)];
+    <-  //-target(X, Y)[source(percept)];
         +tracking(Name, Tid, X, Y);
         .abolish(alreadyTracking(X, Y, _, _));
         .print("Someone is interested about the target, but I win and I start to track the target!");
