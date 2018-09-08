@@ -136,9 +136,9 @@ amInterested(X,Y) :-
 +!confirm(Ag, Tid, Confirmation) 
     :   Confirmation=true &
         not winner(_,_,_,_)
-        //& .print("Auction for ",Ag,"-",Tid," has ended") //TODO remove this
-    <-  !clearAuction(Ag, Tid);.
-        //-tracking(Ag,Tid,_,_)[source(_)].
+        & .print("Auction for ",Ag,"-",Tid," has ended") //TODO remove this
+    <-  !clearAuction(Ag, Tid);
+        -tracking(Ag,Tid,_,_)[source(self)].
 
 // If the winner of my auction confirms his win and I am the winner
 // of a previous auction, lose the current target and confirm my win
@@ -150,7 +150,7 @@ amInterested(X,Y) :-
     <-  +tracking(PrevAg, PrevTid, X, Y);
         !clearAuction(Ag,Tid);
         -winner(PrevAg,PrevTid,_,_)[source(S)];
-        //-tracking(Ag, Tid, _,_)[source(_)];
+        -tracking(Ag, Tid, _,_)[source(self)];
         .send(S, achieve, confirm(PrevAg, PrevTid, true)).
 
 //TODO what if the winner does not confirm?
@@ -277,9 +277,9 @@ amInterested(X,Y) :-
 // I've found, I ignore it. 
 +alreadyTracking(X,Y,V,_)[source(S)]
     :   numberOfAgents(N) &
-        .findall(Ag, alreadyTracking(X,Y,V,_)[source(Ag)], ListOfAnswerers) &
+        .findall(Ag, alreadyTracking(X,Y,_,_)[source(Ag)], ListOfAnswerers) &
         .length(ListOfAnswerers,N-1) &
-        alreadyTracking(X,Y,true,_)[source(T)]
+        alreadyTracking(X,Y,true,_)[source(_)]
     <-  .print("Non me lo prendoooo"); //TODO
        // -target(X,Y)[source(_)];
         .abolish(alreadyTracking(X,Y,_,_)).
@@ -290,7 +290,7 @@ amInterested(X,Y) :-
 // lets only one agent take the task) 
 +alreadyTracking(X,Y,V,_)[source(S)]
     :   numberOfAgents(N) &
-        .findall(Ag, alreadyTracking(X,Y,V,_)[source(Ag)], ListOfAnswerers) &
+        .findall(Ag, alreadyTracking(X,Y,_,_)[source(Ag)], ListOfAnswerers) &
         .length(ListOfAnswerers,N-1) &
         not alreadyTracking(X,Y,true,_) &
         .findall(I, alreadyTracking(X,Y,_,true)[source(I)], ListOfInterested) &
@@ -307,7 +307,7 @@ amInterested(X,Y) :-
 
 +alreadyTracking(X,Y,V,_)[source(S)]
     :   numberOfAgents(N) &
-        .findall(Ag, alreadyTracking(X,Y,V,_)[source(Ag)], ListOfAnswerers) &
+        .findall(Ag, alreadyTracking(X,Y,_,_)[source(Ag)], ListOfAnswerers) &
         .length(ListOfAnswerers,N-1) &
         not alreadyTracking(X,Y,true,_) &
         .findall(I, alreadyTracking(X,Y,_,true)[source(I)], ListOfInterested) &

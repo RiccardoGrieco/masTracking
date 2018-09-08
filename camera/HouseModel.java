@@ -274,7 +274,7 @@ public class HouseModel extends GridWorldModel{
                         }
 
                         //take a long nap
-                        Thread.sleep(10000);
+                        Thread.sleep(2); //TODO
                     } catch (InterruptedException ex) {
                         ex.printStackTrace();
                     }

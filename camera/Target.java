@@ -129,7 +129,7 @@ public final class Target{
         position=chooseSpawnPosition();
         oldPosition = null;
 
-        position = new Location(1, 1); //TODO togli
+        position = new Location(4, 1); //TODO togli
         
         //It's time to start walking around
         walkThread();
