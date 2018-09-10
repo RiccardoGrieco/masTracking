@@ -30,8 +30,8 @@ public final class Target{
     }
 
     public String toString() {
-        return String.format("[%d %s %d %d %d]", 
-                            id, idAgent, progressiveNumber, position.x, position.y);
+        return String.format("[%d %d %d]", 
+                            id, position.x, position.y);
     }
 
     public int hashCode() {
@@ -96,7 +96,7 @@ public final class Target{
     public void walk(){
         if(pathIterator!=null && pathIterator.hasNext()){
             Location next = pathIterator.next();
-            while (!model.isFree(next)) {
+            while (!model.isFree(AgentModel.CAMERA,next) || model.isFree(TARGET, next)) {
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
@@ -120,16 +120,16 @@ public final class Target{
     public Target(){
 
         //Assign id
-        id=count++;
+        id = count++;
 
         //Add reference in the model
         //model.addTarget(this);
 
         //Choose spawn Position
-        position=chooseSpawnPosition();
+        position = chooseSpawnPosition();
         oldPosition = null;
 
-        position = new Location(4, 1); //TODO togli
+        //position = new Location(4, 1); //TODO togli
         
         //It's time to start walking around
         walkThread();
@@ -156,7 +156,7 @@ public final class Target{
         Rectangle room=model.getRooms()[ThreadLocalRandom.current().nextInt(model.getRooms().length)];
         Location location =new Location(ThreadLocalRandom.current().nextInt(room.x, room.x+room.width),
         ThreadLocalRandom.current().nextInt(room.y, room.y+room.height));
-        if(model.isFree(location))
+        if(model.isFree(AgentModel.CAMERA, location))
             return location;
         else
             return chooseSpawnPosition();
@@ -176,7 +176,7 @@ public final class Target{
                             if(pathIterator!=null && pathIterator.hasNext())
                                 pathIterator.next();
                         }
-                    Thread.sleep(5000);
+                    Thread.sleep(6000);
                     walk();
 				    } catch (Exception e) {
 					    e.printStackTrace();

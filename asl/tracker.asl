@@ -8,9 +8,14 @@
 progressiveNo(1).
 
 +tracking(Ag,Tid, X, Y)[source(percept)] <- +tracking(Ag, Tid, X, Y).
+
 +tracking(Ag,Tid, X, Y)[source(self)] 
     : tracking(Ag, Tid, XPrev, YPrev) & (XPrev\==X | YPrev\==Y)
-    <- -tracking(Ag, Tid, Xprev, YPrev). 
+    <- -tracking(Ag, Tid, Xprev, YPrev).
+
++lost[source(percept)]
+    <- -tracking(_, _, _, _).
+
 +numberOfAgents(N)[source(percept)] <- +numberOfAgents(N).
 +noNeighbors(N)[source(percept)]<- +noNeighbors(N).
 +myPosition(X,Y)[source(percept)]<- +myPosition(X,Y).
@@ -51,7 +56,7 @@ amInterested(X,Y) :-
 // When losing the target start an auction.
 +losingTarget(Ag, Tid, X, Y)[source(percept)]
     <- // -losingTarget(Ag, Tid, X, Y);
-        .print("I'm losing my target (",X,",",Y,"), let's start an auction! Target ID: ",Ag,"-",Tid);
+        //.print("I'm losing my target (",X,",",Y,"), let's start an auction! Target ID: ",Ag,"-",Tid);
         .broadcast(achieve, cfp(Ag, Tid, X, Y));
         +auctionOngoing(Ag,Tid, X, Y).
         //!auction(Ag, Tid, X,Y, <parameters that indicates the chain of auctions>)
@@ -63,10 +68,10 @@ amInterested(X,Y) :-
         .findall(PAg, partecipate(Ag, Tid, _)[source(PAg)], ListOfAnswerers) &
         numberOfAgents(N) &
         .length(ListOfAnswerers,N-1) &
-        auctionOngoing(Ag, Tid, X, Y)
-    <-  .findall(Partecipant, partecipate(Ag, Tid ,true)[source(Partecipant)], ListOfPartecipants);
-        .length(ListOfPartecipants, NumberOfPartecipants);
-        +numberOfPartecipants(Ag, Tid, NumberOfPartecipants);
+        auctionOngoing(Ag, Tid, X, Y) &
+        .findall(Partecipant, partecipate(Ag, Tid ,true)[source(Partecipant)], ListOfPartecipants) &
+        .length(ListOfPartecipants, NumberOfPartecipants) 
+    <-  +numberOfPartecipants(Ag, Tid, NumberOfPartecipants);
         //.print("Partecipants individuated, let's get their bid");
         .abolish(partecipate(Ag, Tid, _));
         .send(ListOfPartecipants, achieve, placeBid(Ag, Tid, X, Y)).
@@ -125,7 +130,7 @@ amInterested(X,Y) :-
         auctionOngoing(Ag, Tid, X, Y)
     <-  .max(ListOfBids, bid(B, Winner));
         //.print("The winner of auction ", Ag, "-",Tid, " is ", Winner, " with a bid of ", B);
-        .print("The winner of auction: ", Winner, ".");
+        //.print("The winner of auction: ", Winner, ".");
         //TODO get confirm
         .send(Winner, tell, winner(Ag, Tid, X, Y));
         //TODO get confirm!
@@ -135,8 +140,8 @@ amInterested(X,Y) :-
 // of a previous auction, lose the current target.
 +!confirm(Ag, Tid, Confirmation)[source(S)]
     :   Confirmation=true &
-        not winner(_,_,_,_)
-        & .print("Auction for ",Ag,"-",Tid, "-",X,"-",Y," has ended and the winner is: ", S) //TODO remove this
+        not winner(_,_,_,_)[source(_)]
+        //& .print("Auction for ",Ag,"-",Tid, "-",X,"-",Y," has ended and the winner is: ", S) //TODO remove this
     <-  .abolish(tracking(Ag,Tid,_,_));
         //-tracking(Ag,Tid,_,_)[source(self)];
         !clearAuction(Ag, Tid).
@@ -214,7 +219,7 @@ amInterested(X,Y) :-
 // confirm the win to the auctioneer.
 +winner(Ag, Tid, X, Y)[source(S)] 
     :   not tracking(_,_,_,_) //TODO check correctness
-        & .print("I'm tracking no one, I confirm my win.") //TODO remove this
+        //& .print("I'm tracking no one, I confirm my win.") //TODO remove this
     <-  +tracking(Ag, Tid, X, Y);
         .send(S, achieve, confirm(Ag, Tid, true));
         -winner(Ag, Tid, X, Y)[source(S)].
@@ -223,7 +228,7 @@ amInterested(X,Y) :-
 // for another auction, lose the current target and confirm the win.
 +winner(Ag, Tid, X, Y)[source(S)] 
     :   auctionOngoing(AuctionAg, AuctionTid,_,_) //TODO check correctness
-        & .print("Auction ongoing, I lose my target and I confirm my win.") //TODO remove this
+        //& .print("Auction ongoing, I lose my target and I confirm my win.") //TODO remove this
     <-  +tracking(Ag, Tid, X, Y);
         .abolish(tracking(AuctionAg, AuctionTid, _, _));
         .send(S, achieve, confirm(Ag, Tid, true));
@@ -234,7 +239,7 @@ amInterested(X,Y) :-
 +winner(Ag, Tid, X, Y)[source(S)]
     :   tracking(TrackedAg,TrackedTid, TrackedX, TrackedY) & 
         not auctionOngoing(TrackedAg,TrackedTid , _, _)
-    <-  .print("I'm the winner but I'm tracking someone. I'll start the auction for ",TrackedAg,"-", TrackedTid);
+    <-  //.print("I'm the winner but I'm tracking someone. I'll start the auction for ",TrackedAg,"-", TrackedTid);
         +auctionOngoing(TrackedAg,TrackedTid , TrackedX, TrackedY);
         .broadcast(achieve, cfp(TrackedAg, TrackedTid, TrackedX, TrackedY)).
 
@@ -249,13 +254,15 @@ amInterested(X,Y) :-
 // When I perceive a new target, ask the other agents whether
 // it's tracked by one of them.
 
+//TODO aggiungere qualcosa da fare per quando metteremo più target
 +target(X, Y)[source(percept)]
     :   tracking(Ag, Tid, X2, Y2)[source(_)]
-    <-  .print("Sto già tracciando ",Ag, "-",Tid, "-",X2,"-",Y2," !");.
+    <-  .print("Sto gia' tracciando ",Ag, "-",Tid, "-",X2,"-",Y2," !");
+        .print("Per il momento non facciamo niente.").
 
 +target(X,Y)[source(percept)]  
     :   not tracking(_, _, _, _)[source(_)] //else?
-    <-  .print("aggiunto target da jason1 (",X," ",Y,")");
+    <-  //.print("aggiunto target da jason1 (",X," ",Y,")");
         .broadcast(achieve, tellMeTracking(X,Y)).
 
 
@@ -301,7 +308,7 @@ amInterested(X,Y) :-
         .abolish(alreadyTracking(X,Y,_,_));
         //track(Name, Tid, X, Y); //TODO
         +tracking(Name, Tid, X, Y);
-        .print("No one is interested about the target, I start to track the target!");
+        //.print("No one is interested about the target, I start to track the target!");
         -progressiveNo(Tid);
         +progressiveNo(Tid+1).
 
@@ -317,7 +324,7 @@ amInterested(X,Y) :-
     <-  //-target(X, Y)[source(percept)];
         +tracking(Name, Tid, X, Y);
         .abolish(alreadyTracking(X, Y, _, _));
-        .print("Someone is interested about the target, but I win and I start to track the target!");
+        //.print("Someone is interested about the target, but I win and I start to track the target!");
         -progressiveNo(Tid);
         +progressiveNo(Tid+1).
 

@@ -250,17 +250,9 @@ public final class HouseEnv extends Environment {
 
         addPercept(Literal.parseLiteral("numberOfAgents(16)"));*/
 
-        // non va bene: il letterale 'target' lo usiamo solo quando un agente si accorge di un target.
-        /*for (Target target : model.getTargets()) {
-            Location position=target.getPosition();
-            addPercept(Literal.parseLiteral("target("+
-            String.valueOf(target.getId())+""+
-            String.valueOf(position.x)+
-            ","+String.valueOf(position.y)+")"));
-        }*/
-
         //updateTargets();
         updateModel();
+        
         
 
         for(Target target : model.getTargets()) {
@@ -272,7 +264,9 @@ public final class HouseEnv extends Environment {
             if(tracker != null) {
                 
                 if(target.getIdAgent()==null){
-                    System.out.println("BOOOOOH");//TODO togliere
+                    //System.out.println("BOOOOOH");//TODO togliere
+                    addPercept(tracker.getName(), 
+                                Literal.parseLiteral("lost"));
                     continue;
                 }
                 camViewZone = tracker.getViewZone();
@@ -296,11 +290,11 @@ public final class HouseEnv extends Environment {
                         //while(true);//TODO forse rimettere
                     }
                 }
-                /*else{
-                    removePercept(tracker.getName(), 
+                else{
+                    /*removePercept(tracker.getName(), 
                         Literal.parseLiteral("tracking(" + target.getIdAgent() + ", " + 
-                        target.getProgressiveNumber() + ", _, _)"));
-                }*/
+                        target.getProgressiveNumber() + ", _, _)"));*/
+                }
             }
 
             //if(targetsRecentlyNotified.contains(target)) continue;
@@ -308,13 +302,13 @@ public final class HouseEnv extends Environment {
             for(AgentModel agent : model.getCameraAgents()) {
                 camViewZone = agent.getViewZone();
 
-                if(tracker == null || !tracker.equals(agent)) {
+                if(tracker == null || target.getIdAgent() == null || !tracker.equals(agent)) {
                     // ** TARGET **
                     // A camera agent percepts a target if and only if the target is in
                     // the camera view zone and the camera is not tracking it yet.
                     if(camViewZone.contains(targetPos.x, targetPos.y) || 
                         agent.isInShadowZones(targetPos)){
-                        System.out.println("L'agente " + agent.getName() + " ha trovato il target " + target.toString());
+                        //System.out.println("L'agente " + agent.getName() + " ha trovato il target " + target.toString());
                         //lista.add(agent);
                         addPercept(agent.getName(), 
                             Literal.parseLiteral("target(" + targetPos.x + ", " + targetPos.y + ")"));
@@ -328,6 +322,12 @@ public final class HouseEnv extends Environment {
 
             //targetsRecentlyNotified.add(target);
         }
+
+        //System.out.println("Mappa dei tracciamenti:");
+        for(AgentModel a : model.getAgentsTrackingMap().keySet()) {
+            System.out.println(String.format("Agente %s traccia target %s.", a, model.getAgentsTrackingMap().get(a)));
+        }
+        System.out.println("");
 
         /*for(AgentModel cam : model.getCameraAgents()) {
 
@@ -352,6 +352,7 @@ public final class HouseEnv extends Environment {
         Target.BLOCK_LIST.clear();
     }
 
+    Target lost = null;
     /**
      * Update, in model, info about targets:
      * - update the tracking maps
@@ -360,7 +361,7 @@ public final class HouseEnv extends Environment {
     private void updateModel() {
         List<Target> freeTargets = new ArrayList<>(model.getTargets());
         Iterator<Literal> itLiteral = null;
-
+        lost = null;
         synchronized(Target.BLOCK_LIST){
             // clear the tracking-map cause there may be lost targets
             Map<AgentModel, Target> agentToTracked = model.getAgentsTrackingMap();
@@ -404,7 +405,11 @@ public final class HouseEnv extends Environment {
                             agentToTracked.put(ag, target);
                             trackedToAgent.put(target, ag);
                             
-                            found = true;
+                            if(ag.getViewZone().contains(new Point(target.getPosition().x, 
+                                                                    target.getPosition().y)) || 
+                                ag.isInShadowZones(target.getPosition())){
+                                found = true;
+                            }
                             break;
                         }
                     }
@@ -417,6 +422,8 @@ public final class HouseEnv extends Environment {
             }
             //System.out.println("Mappa " + trackedToAgent.toString());
         }
+
+
 
         // manage tracking changes
         /*for(AgentModel agent : model.getCameraAgents()) {

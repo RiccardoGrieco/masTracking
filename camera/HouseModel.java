@@ -42,7 +42,7 @@ public class HouseModel extends GridWorldModel{
     KShortestSimplePaths<Location,DefaultEdge> builderPaths;
 
     //Maximum Target number
-    private static final int MAX_TARGET = 1;        // TO CHANGE!
+    private static final int MAX_TARGET = 22;        //TODO TO CHANGE!
 
     //Target List useful for the environment
     private final List<Target> targets = new ArrayList<>();
@@ -274,7 +274,7 @@ public class HouseModel extends GridWorldModel{
                         }
 
                         //take a long nap
-                        Thread.sleep(2); //TODO
+                        Thread.sleep(20000); //TODO
                     } catch (InterruptedException ex) {
                         ex.printStackTrace();
                     }

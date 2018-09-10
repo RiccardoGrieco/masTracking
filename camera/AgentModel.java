@@ -60,8 +60,8 @@ public class AgentModel extends Agent {
     }
 
     public String toString() {
-        return String.format("[%s %d %d]", 
-                            name, position.x, position.y);
+        return String.format("[%s]", 
+                            name);
     }
 
     public int hashCode() {
