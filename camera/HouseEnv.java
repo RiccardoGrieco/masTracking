@@ -109,7 +109,7 @@ public final class HouseEnv extends Environment {
                             
                         }
                         try {
-                         Thread.sleep(1000);
+                         Thread.sleep(1200);
                         } catch (Exception e) {
                             //TODO: handle exception
                         }
@@ -314,7 +314,7 @@ public final class HouseEnv extends Environment {
                     // the camera view zone and the camera is not tracking it yet.
                     if(camViewZone.contains(targetPos.x, targetPos.y) || 
                         agent.isInShadowZones(targetPos)){
-                        System.out.println("L'agente " + agent.getName() + " ha trovato il target " + target.getId());
+                        System.out.println("L'agente " + agent.getName() + " ha trovato il target " + target.toString());
                         //lista.add(agent);
                         addPercept(agent.getName(), 
                             Literal.parseLiteral("target(" + targetPos.x + ", " + targetPos.y + ")"));
