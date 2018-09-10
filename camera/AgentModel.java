@@ -1,39 +1,47 @@
 package camera;
+
 import jason.architecture.*;
 import jason.asSemantics.Agent;
 import jason.environment.grid.Location;
-
 import java.awt.Color;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.*;
 
 
+//Model an agent from java point of view
 public class AgentModel extends Agent {
+
+    private static HouseModel model;
+
+    //Same name in MAS console
     private String name;
+
+    //where the agent is located
     protected Location position;
+
+    //Area controlled by the agent
     private Rectangle viewZone;
+
     private boolean canMove;
+
+    //Used to build the viewZone
     private int radius;
 
     public static final int CAMERA = 32;
 
+    //Last points where an agent can see
     private List<Point> shadowZones;
 
-    /**
-     * @return the points
-     */
     public List<Point> getshadowZones() {
         return shadowZones;
     }
 
-    /**
-     * @param shadowZones the shadowZones to set
-     */
     public void setShadowZones(List<Point> shadowZones) {
         this.shadowZones = shadowZones;
     }
 
+    //Check if a target is coming out of the visual field
     public boolean isInShadowZones(Location point){
         if(shadowZones == null) return false;
         for(Point shadow: shadowZones){
@@ -43,16 +51,11 @@ public class AgentModel extends Agent {
         return false;
     }
 
-    private static HouseModel model;
-
-    /**
-     * Constructor.
-     */
-
      public AgentModel(){
          canMove=false;
      }
 
+    //Two target are equals if and only if they have same jason name
     public boolean equals(Object other) {
         AgentModel otherA = (AgentModel) other;
 
@@ -64,6 +67,7 @@ public class AgentModel extends Agent {
                             name);
     }
 
+    //In order to match equals
     public int hashCode() {
         return name.hashCode();
     }
@@ -80,6 +84,7 @@ public class AgentModel extends Agent {
         position = location;
     }
 
+    //Set the radius and build the view zone
     public void setRadius(int radius) {
         this.radius = radius;
         int x=position.x,y=position.y;          
@@ -94,9 +99,6 @@ public class AgentModel extends Agent {
         return name;
     }
 
-    /**
-     * @param name the name to set
-     */
     public void setName(String name) {
         this.name = name;
     }
@@ -113,9 +115,6 @@ public class AgentModel extends Agent {
         return model;
     }
 
-    /**
-     * @return true if and only is the agent can move
-     */
     public boolean canMove() {
         return canMove;
     }
@@ -125,8 +124,9 @@ public class AgentModel extends Agent {
     
     /**
      * A moving agent can do what a camera agent can do, but also he moves!
+     * NEVER USED
      */
-    public  static final class MovingAgent extends AgentModel {
+    public static final class MovingAgent extends AgentModel {
         private List<Location> checkpoints;             // Fixed
         private Iterator<Location> checkpointsIterator;
         private Location nextCheckpoint;                // Next position to reach
@@ -138,7 +138,7 @@ public class AgentModel extends Agent {
          */
         public MovingAgent(String name, int x, int y, List<Location> cp){
             //super(name, x, y, true);
-
+            super.canMove=false;
             checkpoints = cp;
             checkpointsIterator = cp.iterator();
             nextCheckpoint = checkpointsIterator.next();
@@ -176,29 +176,21 @@ public class AgentModel extends Agent {
     }
 
     public static final class YellowBox {
+
         public static final int YELLOW_BOX = 64;
 
         private final Location position;
         public static final Color MY_YELLOW = new Color(255, 255, 0, 50);
         private int id = YELLOW_BOX;
 
-        /**
-         * @return the id
-         */
         public int getId() {
             return id;
         }
 
-        /**
-         * @param id the id to set
-         */
         public void setId(int id) {
             this.id = id;
         }
 
-        /**
-         * @return the position
-         */
         public Location getPosition() {
             return position;
         }

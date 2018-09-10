@@ -1,4 +1,5 @@
 package camera;
+
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.io.BufferedReader;
@@ -16,52 +17,49 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.Iterator;
-
 import org.jgrapht.GraphPath;
 import org.jgrapht.alg.shortestpath.KShortestSimplePaths;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.DefaultUndirectedGraph;
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import jason.asSyntax.PredicateIndicator;
 import jason.environment.grid.GridWorldModel;
 import jason.environment.grid.Location;
 import jason.asSyntax.Literal;
 
+
+//Helper Model class
 public class HouseModel extends GridWorldModel{
 
-    //World dimensions
+    //Environment dimensions
     public static final int HEIGHT=21, WIDTH=21;
 
-    //Descriptions location
+    //Environment description path
     private static final String PATH="resources/";
 
-    //WalkableGraph
+    //WalkableGraph useful for targets
     private final DefaultUndirectedGraph<Location,DefaultEdge> walkableGraph=new DefaultUndirectedGraph<>(DefaultEdge.class);
     KShortestSimplePaths<Location,DefaultEdge> builderPaths;
 
     //Maximum Target number
-    private static final int MAX_TARGET = 22;        //TODO TO CHANGE!
+    private static final int MAX_TARGET = 5;        //TODO TO CHANGE!
 
-    //Target List useful for the environment
+    //Target and Agent  List useful for the environment
     private final List<Target> targets = new ArrayList<>();
     
     private List<AgentModel> cameraAgents = new ArrayList<>();
     
-    //private final List<AgentModel> movingAgents = new ArrayList<>();
+    //Contains link between an agent and its target and viceversa
+    private Map<AgentModel, Target> agentsTrackingMap;         
+    private Map<Target, AgentModel> inverseAgentsTrackingMap;   
 
-    private Map<AgentModel, Target> agentsTrackingMap;          // has info about agents and their tracking
-    private Map<Target, AgentModel> inverseAgentsTrackingMap;    // 
-
-    //private Map<MovingAgent, Target> movingTargetTrackingMap;
-
-    //Lo conservo non si può mai sapere
+    //Visibility area map
     private final Map<Location, AgentModel.YellowBox> yellowBoxes=new HashMap<>();
 
-    /**
-     * @return the yellowBoxes
-     */
+    //Info about room sizes
+    private Rectangle[] rooms;
+
     public Map<Location, AgentModel.YellowBox> getYellowBoxes() {
         return yellowBoxes;
     }
@@ -90,9 +88,6 @@ public class HouseModel extends GridWorldModel{
         return inverseAgentsTrackingMap;
     }
 
-    //Rooms array
-    private Rectangle[] rooms;
-
     public Rectangle[] getRooms() {
         return rooms;
     }
@@ -102,9 +97,10 @@ public class HouseModel extends GridWorldModel{
 
         agentsTrackingMap  = new HashMap<>();
         inverseAgentsTrackingMap = new HashMap<>();
-        //movingTargetTrackingMap  = new HashMap<>();
 
         cameraAgents = agents;
+
+        //Add camera and their visibility area to Canvas 
         registerCamera();
 
         //Parsing char matrix from level description
@@ -114,7 +110,7 @@ public class HouseModel extends GridWorldModel{
         //Add wall to the model
         addGraphicsWall(walls);
 
-        //Build the graph walkable by mobile-agents/target
+        //Build the graph walkable by Target
         buildWalkableGraph(walls);
 
         //Parse rooms area description 
@@ -131,8 +127,9 @@ public class HouseModel extends GridWorldModel{
         
     }
 
+
+    //Helper method to parse level description from file and build a char matix rappresentation
     private void parseLevelMatrix(String location,char[][] walls){
-        //Load file var
         FileReader file;
         LineNumberReader lReader;
 
@@ -166,6 +163,7 @@ public class HouseModel extends GridWorldModel{
 		}
     }
 
+    //Add walls (as obastacles) to Canvas
     private void addGraphicsWall(char[][] walls){
         for (int i = 0; i < walls.length; i++) {
             for (int j = 0; j < walls[i].length; j++) {
@@ -175,6 +173,7 @@ public class HouseModel extends GridWorldModel{
         }
     }
 
+    //Build walkable position by target graph 
     private void buildWalkableGraph(char[][] walls){
 
         //Build Support Matrix adj
@@ -187,7 +186,8 @@ public class HouseModel extends GridWorldModel{
                 }
             }
         }
-        //find relationship on the same horizontal line
+
+        //Find path on the same horizontal line
         for (int i = 0; i < HEIGHT; i++) {
             for (int j = 0; j < WIDTH-1; j++) {
                 if(matrix[i][j]!=null && matrix[i][j+1]!=null)
@@ -195,17 +195,19 @@ public class HouseModel extends GridWorldModel{
             }
         }
 
-        //find relationship on the same vertical line
+        //find path on the same vertical line
         for (int i = 0; i < WIDTH; i++) {
             for (int j = 0; j < HEIGHT-1; j++) {
                 if(matrix[j][i]!=null && matrix[j+1][i]!=null)
                     walkableGraph.addEdge(matrix[j][i], matrix[j+1][i]);
             }
         }
-        //Create path finder
+
+        //Create path finder (path shorter (or equals to) than K)
         builderPaths=new KShortestSimplePaths<>(walkableGraph);
     }
 
+    //Build Rooms area from their description
     private void findRooms(String file){
         String result=null;
         try {
@@ -237,11 +239,13 @@ public class HouseModel extends GridWorldModel{
     }
 
 
+    //Return a random path form start point to end point with a number of stemp <=80
     public List<Location> getAPath(Location start, Location end){           
        List<GraphPath<Location,DefaultEdge>> paths= builderPaths.getPaths(start, end, 80);
        return paths.get(ThreadLocalRandom.current().nextInt(paths.size())).getVertexList();
     }
 
+    //Avoid repaint Canvas
     public void updateTarget(Location old, Location next){
         synchronized (this){
             remove(Target.TARGET, old.x, old.y);
@@ -250,6 +254,7 @@ public class HouseModel extends GridWorldModel{
         
     }
 
+    //Span target manager
     private void spawnerTargetThread(){
         Thread thread=new Thread(new Runnable(){
             @Override
@@ -257,10 +262,8 @@ public class HouseModel extends GridWorldModel{
                 int count=0;
                 while(count<MAX_TARGET){
                     try {
-
                         synchronized(Target.BLOCK_LIST){
                             Target newTarget = new Target();
-
                             targets.add(newTarget);
                             System.out.println("A wild target appears in position (" + 
                                 newTarget.getPosition() + ")!");
@@ -269,11 +272,11 @@ public class HouseModel extends GridWorldModel{
                             add(Target.TARGET, newTarget.getPosition());
                             count++;
 
+                            //Notify environment about new target
                             Target.BLOCK_LIST.add(newTarget);
                             Target.BLOCK_LIST.notifyAll();
                         }
-
-                        //take a long nap
+                        //Take a long nap
                         Thread.sleep(20000); //TODO
                     } catch (InterruptedException ex) {
                         ex.printStackTrace();
@@ -284,6 +287,7 @@ public class HouseModel extends GridWorldModel{
         thread.start();
     }
 
+    //Inform view about camera agents and their view zone
     private void registerCamera(){
         for (AgentModel agent : cameraAgents) {
             add(AgentModel.CAMERA, agent.getPosition());
@@ -297,6 +301,7 @@ public class HouseModel extends GridWorldModel{
         }
     }
 
+    //Find view area for each camera
     private void initYellowBoxes(AgentModel agent){
         Rectangle viewZone=agent.getViewZone();
         Location position=agent.getPosition();
@@ -313,6 +318,7 @@ public class HouseModel extends GridWorldModel{
         }
     }
 
+    //Shared view area
     private void initSpecialYellowBoxes(){
         int a =WIDTH/2;
         int b=HEIGHT/5;

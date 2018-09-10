@@ -1,4 +1,5 @@
 package camera;
+
 import jason.*;
 import jason.asSyntax.*;
 import jason.bb.BeliefBase;
@@ -31,10 +32,9 @@ public class calculateBid extends DefaultInternalAction {
         Unifier unifier;
         Iterator<Literal> itLiteral = null;
 
-        // retrieves agent's no. neightbors
+        //Retrieves agent's no. neightbors
         itLiteral = agentBB.getCandidateBeliefs(new PredicateIndicator("noNeighbors", 1));
         tmpLiteral = itLiteral.next();
-        //tmpLiteral = agentBB.contains(Literal.parseLiteral("noNeighbors(1)"));
         try {
             noNeighbors = Double.valueOf(tmpLiteral.getTermsArray()[0].toString());
         }
@@ -43,7 +43,7 @@ public class calculateBid extends DefaultInternalAction {
                 + "agent '" + agent + "' has literal 'noNeighbors' in BB with no arguments!");
         }
 
-        // retrieves agent's coordinates
+        //Retrieves agent's coordinates
         itLiteral = agentBB.getCandidateBeliefs(new PredicateIndicator("myPosition", 2));
         tmpLiteral = itLiteral.next();
         
@@ -69,11 +69,11 @@ public class calculateBid extends DefaultInternalAction {
                 NumberTerm targetXCoord = (NumberTerm) args[0];
                 NumberTerm targetYCoord = (NumberTerm) args[1];
 
-                // retrieves actual target's coords
+                //Retrieves actual target's coords
                 itLiteral = agentBB.getCandidateBeliefs(new PredicateIndicator("tracking", 4));
                 
                 
-                // if agent is free
+                //If agent is free
                 if(itLiteral == null) {
                     dist = euclideanDistance(agentXCoord, agentYCoord, targetXCoord.solve(), targetYCoord.solve());
                     cost = ((1/dist) + K) / noNeighbors;

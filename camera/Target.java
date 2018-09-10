@@ -1,20 +1,28 @@
 package camera;
+
 import java.awt.Rectangle;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
-
 import jason.environment.grid.Location;
 
+
+/*Class that model a Target. A target is something that moves within the environment identified as relevant by agents.
+  A target should be always tracked by an agent and is the subject of auctions between agents*/
 public final class Target{
 
+    //Contains Target that have just moved. Useful to keep agents focused on them
     public static final LinkedList<Target> BLOCK_LIST=new LinkedList<>();
 
     //Id Target
     private static int count=0;
     private final int id;
+
+    //Traget tracked by Agent(idAgent)
     private String idAgent = null;
+
+    //Id that agent assigns to target
     private int progressiveNumber;
 
     //Useful information for the view in order to draw the right texture
@@ -23,17 +31,30 @@ public final class Target{
     //Our Model reference
     private static HouseModel model;
 
+    //Actual, previous and target position 
+    private Location position, oldPosition, destination;
+
+    //Current path to follow
+    private List <Location> path;
+
+    //Next step position iterator
+    private Iterator<Location> pathIterator;
+
+
+    //Two target are equals if and only if they have same id
     public boolean equals(Object other) {
         Target otherT = (Target) other;
 
         return id == otherT.id;
     }
 
+    //Helpful model for MAS Console
     public String toString() {
         return String.format("[%d %d %d]", 
                             id, position.x, position.y);
     }
 
+    //In order to match equals
     public int hashCode() {
         return id;
     }
@@ -58,23 +79,14 @@ public final class Target{
         return id;
     }
 
-    //Actual position and next target to be reached
-    private Location position, oldPosition, destination;
-
     public Location getPosition() {
         return position;
     }
 
-    /**
-     * @return the oldPosition
-     */
     public Location getOldPosition() {
         return oldPosition;
     }
 
-    /**
-     * @param oldPosition the oldPosition to set
-     */
     public void setOldPosition(Location oldPosition) {
         this.oldPosition = oldPosition;
     }
@@ -87,24 +99,43 @@ public final class Target{
         return progressiveNumber;
     }
 
-    //Current path to destination
-    private List <Location> path;
+    public Target(){
 
-    private Iterator<Location> pathIterator;
+        //Assign next available id 
+        id = count++;
 
-    //Update position and inform view
+        //Add reference in the model
+        model.addTarget(this);
+
+        //Choose spawn Position
+        position = chooseSpawnPosition();
+        oldPosition = null;
+        
+        //It's time to start walking around
+        walkThread();
+    }
+
+
+    //Move to next position inform model and MAS environment
     public void walk(){
         if(pathIterator!=null && pathIterator.hasNext()){
+            //Find next step
             Location next = pathIterator.next();
-            while (!model.isFree(AgentModel.CAMERA,next) || model.isFree(TARGET, next)) {
+
+            //No space for me in the next area
+            while (!model.isFree(AgentModel.CAMERA,next) || !model.isFree(TARGET,next)) {
                 try {
+                    //Oh I'll be wait here :(
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
-    
-            model.updateTarget(position, next);     // For view
+            
+            //Please inform View to redraw 
+            model.updateTarget(position, next);
+
+            //Inform environment about my move
             synchronized(BLOCK_LIST){
                 oldPosition=position;
                 position = next;
@@ -112,38 +143,26 @@ public final class Target{
                 BLOCK_LIST.notifyAll();
             }
         }
+
+        //Time to find a new trip
         else
             destination=null;
-         //System.out.println("X: "+position.x+" Y: "+position.y);
     }
 
-    public Target(){
 
-        //Assign id
-        id = count++;
-
-        //Add reference in the model
-        //model.addTarget(this);
-
-        //Choose spawn Position
-        position = chooseSpawnPosition();
-        oldPosition = null;
-
-        //position = new Location(4, 1); //TODO togli
-        
-        //It's time to start walking around
-        walkThread();
-    }
-
-    //Found a target position on diffferent room to reach
+    //Found new position on different room to reach
     private void findDestination(){
         while (true) {
-           int roomId= ThreadLocalRandom.current().nextInt(model.getRooms().length);
-           Rectangle room=model.getRooms()[roomId];
-           if(!room.contains(position.x, position.y)){
+            //Choose a room
+            int roomId= ThreadLocalRandom.current().nextInt(model.getRooms().length);
+            Rectangle room=model.getRooms()[roomId];
+
+            //nextRomm!=actualRoom 
+            if(!room.contains(position.x, position.y)){
+                //Generate casual free location 
                 Location location=new Location(ThreadLocalRandom.current().nextInt(room.x, room.x+room.width),
                 ThreadLocalRandom.current().nextInt(room.y, room.y+room.height));
-                if(model.isFree(location)){
+                if(model.isFree(AgentModel.CAMERA,location)){
                     destination=location;
                     return;
                 }
@@ -151,7 +170,7 @@ public final class Target{
         }
     }
 
-    //Found right spawn position 
+    //Found free (no camera) spawn position 
     private Location chooseSpawnPosition(){
         Rectangle room=model.getRooms()[ThreadLocalRandom.current().nextInt(model.getRooms().length)];
         Location location =new Location(ThreadLocalRandom.current().nextInt(room.x, room.x+room.width),
@@ -176,6 +195,8 @@ public final class Target{
                             if(pathIterator!=null && pathIterator.hasNext())
                                 pathIterator.next();
                         }
+                        
+                    //Let me breathe I am breathless
                     Thread.sleep(2000);
                     walk();
 				    } catch (Exception e) {
