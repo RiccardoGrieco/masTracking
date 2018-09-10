@@ -176,7 +176,7 @@ public final class Target{
                             if(pathIterator!=null && pathIterator.hasNext())
                                 pathIterator.next();
                         }
-                    Thread.sleep(6000);
+                    Thread.sleep(2000);
                     walk();
 				    } catch (Exception e) {
 					    e.printStackTrace();
