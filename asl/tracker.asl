@@ -7,12 +7,15 @@
 //numberOfAgents(2).
 progressiveNo(1).
 
+//From source(percept) to source(self)
 +tracking(Ag,Tid, X, Y)[source(percept)] <- +tracking(Ag, Tid, X, Y).
 
+//Update tracked target position
 +tracking(Ag,Tid, X, Y)[source(self)] 
     : tracking(Ag, Tid, XPrev, YPrev) & (XPrev\==X | YPrev\==Y)
     <- -tracking(Ag, Tid, Xprev, YPrev).
 
+//Environment says my tracked target is out my viewZone 
 +lost[source(percept)]
     <- -tracking(_, _, _, _).
 
@@ -39,18 +42,11 @@ amInterested(X,Y) :-
 
 /* Plans */
 
-//TODO implement in Agent class?
-/*+tracking(Ag, Tid, X, Y)[source(percept)]
-    :   tracking(Ag, Tid, Xprev, Yprev)[source(S)] & (X\==Xprev | Y\==Yprev)
-    <-  .print("Aggiorno tracking da BB:", Ag, Tid, Xprev, Yprev, " in ", X, Y);
-        -tracking(Ag, Tid, Xprev, Yprev)[source(S)].
-*///TODO togli
-
 
 /*------------------------ Auctioneer ------------------------*/
 /* 
 * Behaviour of the tracker who has to lose his target.
-* //TODO describe
+*
 */
 
 // When losing the target start an auction.
@@ -61,8 +57,8 @@ amInterested(X,Y) :-
         +auctionOngoing(Ag,Tid, X, Y).
         //!auction(Ag, Tid, X,Y, <parameters that indicates the chain of auctions>)
 
-// Wait for all agents to tell whether they want to partecipate or not.
-// Tell the interested ones to place their bid.
+//Wait for all agents to tell whether they want to partecipate or not.
+//Tell the interested ones to place their bid.
 +partecipate(Ag, Tid, V)[source(S)]
     :   //.print(S," wants to partecipate to the auction for ", Ag,"-",Tid, " ? ", V) &
         .findall(PAg, partecipate(Ag, Tid, _)[source(PAg)], ListOfAnswerers) &
@@ -77,23 +73,23 @@ amInterested(X,Y) :-
         .send(ListOfPartecipants, achieve, placeBid(Ag, Tid, X, Y)).
 
 
-// If there are no partecipants in the auction, cancel it.
+//If there are no partecipants in the auction, cancel it.
 +numberOfPartecipants(Ag, Tid, 0)
     :   not winner(_,_,_,_)[source(S)]
     <-  !clearAuction(Ag, Tid).
 
-// If there are no partecipants in my auction and I am the winner 
-// of a previous auction, cancel the current and tell the previous
-// auctioneer that I can't confirm my win.
+//If there are no partecipants in my auction and I am the winner 
+//of a previous auction, cancel the current and tell the previous
+//auctioneer that I can't confirm my win.
 +numberOfPartecipants(Ag, Tid, 0)
     :   winner(PrevAg, PrevTid, X, Y)[source(S)]
     <-  !clearAuction(Ag, Tid);
         -winner(PrevAg, PrevTid, _, _)[source(S)];
         .send(S, achieve, confirm(PrevAg, PrevTid, false)).
 
-// If all agents have told me they don't want to partecipate and I am the winner 
-// of a previous auction, cancel the current and tell the previous
-// auctioneer that I can't confirm my win.
+//If all agents have told me they don't want to partecipate and I am the winner 
+//of a previous auction, cancel the current and tell the previous
+//auctioneer that I can't confirm my win.
 +partecipate(Ag, Tid, V)[source(S)]
     :   .findall(PAg, partecipate(Ag, Tid, _)[source(PAg)], ListOfAnswerers) &
         numberOfAgents(N) &
@@ -104,8 +100,8 @@ amInterested(X,Y) :-
         -winner(PrevAg, PrevTid, _, _)[source(S)];
         .send(S, achieve, confirm(PrevAg, PrevTid, false)).
 
-// If all agents have told me they don't want to partecipate and I'm not the winner 
-// of a previous auction, just cancel the current.
+//If all agents have told me they don't want to partecipate and I'm not the winner 
+//of a previous auction, just cancel the current.
 +partecipate(Ag, Tid, V)[source(S)]
     :   .findall(PAg, partecipate(Ag, Tid, _)[source(PAg)], ListOfAnswerers) &
         numberOfAgents(N) &
@@ -114,8 +110,8 @@ amInterested(X,Y) :-
         not winner(PrevAg, PrevTid, _, _)[source(S)]
     <-  !clearAuction(Ag, Tid).
 
-// After all of the agents interested in my target have placed their bid,
-// find the winner.
+//After all of the agents interested in my target have placed their bid,
+//find the winner.
 +bid(Ag, Tid, V)[source(S)]
     :   //.print(S, "'s bid for auction ", Ag,"-",Tid, " is: ", V) &
         .findall(bid(B, PAg), bid(Ag, Tid ,B)[source(PAg)], ListOfBids) &
@@ -124,7 +120,7 @@ amInterested(X,Y) :-
         auctionOngoing(Ag, Tid, X, Y)
     <-  !findWinner(Ag, Tid).
 
-// Communicate the win to the winner (only).
+//Communicate the win to the winner (only).
 +!findWinner(Ag, Tid)
     :   .findall(bid(B, PAg), bid(Ag, Tid ,B)[source(PAg)], ListOfBids) &
         auctionOngoing(Ag, Tid, X, Y)
@@ -132,23 +128,20 @@ amInterested(X,Y) :-
         //.print("The winner of auction ", Ag, "-",Tid, " is ", Winner, " with a bid of ", B);
         //.print("The winner of auction: ", Winner, ".");
         //TODO get confirm
-        .send(Winner, tell, winner(Ag, Tid, X, Y));
-        //TODO get confirm!
-        .
+        .send(Winner, tell, winner(Ag, Tid, X, Y)).
 
-// If the winner of my auction confirms his win and I'm not the winner
-// of a previous auction, lose the current target.
+//If the winner of my auction confirms his win and I'm not the winner
+//of a previous auction, lose the current target.
 +!confirm(Ag, Tid, Confirmation)[source(S)]
     :   Confirmation=true &
         not winner(_,_,_,_)[source(_)]
-        //& .print("Auction for ",Ag,"-",Tid, "-",X,"-",Y," has ended and the winner is: ", S) //TODO remove this
     <-  .abolish(tracking(Ag,Tid,_,_));
         //-tracking(Ag,Tid,_,_)[source(self)];
         !clearAuction(Ag, Tid).
 
-// If the winner of my auction confirms his win and I am the winner
-// of a previous auction, lose the current target and confirm my win
-// to the previous auctioneer. 
+//If the winner of my auction confirms his win and I am the winner
+//of a previous auction, lose the current target and confirm my win
+//to the previous auctioneer. 
 +!confirm(Ag, Tid, Confirmation)[source(S)]
     :   Confirmation=true &
         winner(PrevAg, PrevTid, X ,Y)[source(S)]
@@ -161,16 +154,16 @@ amInterested(X,Y) :-
 
 //TODO what if the winner does not confirm?
 
-// If the winner of my auction refuses his win, calculate a new winner
-// if there are enough partecipants left.
+//If the winner of my auction refuses his win, calculate a new winner
+//if there are enough partecipants left.
 +!confirm(Ag, Tid, Confirmation)[source(S)]
     :   Confirmation=false & .count(bid(Ag,Tid,_),N) & N>1
     <-  -bid(Ag, Tid,_)[source(S)];
         !findWinner(Ag, Tid).
 
-// If the winner of my auction refuses his win and there are no 
-// partecipants left and I am the winner of a previous auction,
-// cancel my auction and refuse the previous win. 
+//If the winner of my auction refuses his win and there are no 
+//partecipants left and I am the winner of a previous auction,
+//cancel my auction and refuse the previous win. 
 +!confirm(Ag, Tid, Confirmation) 
     :   Confirmation=false & .count(bid(Ag,Tid,_),1) &
         winner(PrevAg, PrevTid, _, _)[source(S)]
@@ -178,9 +171,9 @@ amInterested(X,Y) :-
         -winner(PrevAg, PrevTid, _, _)[source(S)];
         .send(S, achieve, confirm(PrevAg, PrevTid, false)).
 
-// If the winner of my auction refuses his win and there are no 
-// partecipants left and I'm not the winner of a previous auction,
-// just cancel my auction. 
+//If the winner of my auction refuses his win and there are no 
+//partecipants left and I'm not the winner of a previous auction,
+//just cancel my auction. 
 +!confirm(Ag, Tid, Confirmation) 
     :   Confirmation=false & .count(bid(Ag,Tid,_),1) &
         not winner(PrevAg, PrevTid, _, _)[source(S)]
@@ -188,7 +181,7 @@ amInterested(X,Y) :-
         //TODO implement
         //.print("not implemented yet").
 
-// Clear the beliefs used to manage an auction
+//Clear the beliefs used to manage an auction
 +!clearAuction(Ag, Tid)
     <-  -auctionOngoing(Ag,Tid, _, _);
         .abolish(bid(Ag,Tid,_));
@@ -200,23 +193,19 @@ amInterested(X,Y) :-
 /**
 * Behaviour of the agent when he is asked whether he wants to
 * take care of a target tracked by another agent.
-* 
-* //TODO describe 
 **/
 
-// Tell an auctioneer whether I want to partecipate to his auction or not.
+//Tell an auctioneer whether I want to partecipate to his auction or not.
 +!cfp(Ag, Tid, X, Y)[source(S)] : amInterested(X, Y) <- .send(S, tell, partecipate(Ag, Tid ,true)).
 +!cfp(Ag, Tid, X, Y)[source(S)] : not amInterested(X, Y) <- .send(S, tell, partecipate(Ag, Tid,false)).
 
 // Place a bid for a target.
 +!placeBid(Ag, Tid, X, Y)[source(S)]
     <-  camera.calculateBid(X, Y, B);
-        //.random(B);
-        //.print("My bid for auction ",Ag,"-",Tid," is: ", B);
         .send(S, tell, bid(Ag, Tid,B)).
 
-// When I'm told I'm the winner and I'm free,
-// confirm the win to the auctioneer.
+//When I'm told I'm the winner and I'm free,
+//confirm the win to the auctioneer.
 +winner(Ag, Tid, X, Y)[source(S)] 
     :   not tracking(_,_,_,_) //TODO check correctness
         //& .print("I'm tracking no one, I confirm my win.") //TODO remove this
@@ -224,8 +213,8 @@ amInterested(X,Y) :-
         .send(S, achieve, confirm(Ag, Tid, true));
         -winner(Ag, Tid, X, Y)[source(S)].
 
-// When I'm told I'm the winner of an auction but I'm also the auctioneer
-// for another auction, lose the current target and confirm the win.
+//When I'm told I'm the winner of an auction but I'm also the auctioneer
+//for another auction, lose the current target and confirm the win.
 +winner(Ag, Tid, X, Y)[source(S)] 
     :   auctionOngoing(AuctionAg, AuctionTid,_,_) //TODO check correctness
         //& .print("Auction ongoing, I lose my target and I confirm my win.") //TODO remove this
@@ -234,8 +223,8 @@ amInterested(X,Y) :-
         .send(S, achieve, confirm(Ag, Tid, true));
         -winner(Ag, Tid, X, Y)[source(S)];.
 
-// When I'm told I'm the winner of an auction but I'm already tracking
-// a target, start a new auction before I confirm my win.
+//When I'm told I'm the winner of an auction but I'm already tracking
+//a target, start a new auction before I confirm my win.
 +winner(Ag, Tid, X, Y)[source(S)]
     :   tracking(TrackedAg,TrackedTid, TrackedX, TrackedY) & 
         not auctionOngoing(TrackedAg,TrackedTid , _, _)
@@ -280,8 +269,8 @@ amInterested(X,Y) :-
     :  amInterested(X,Y) & not tracking(_,_,X,Y)[source(_)]
     <- .send(S, tell, alreadyTracking(X,Y,false, true)).
 
-// When one of the agents tells me he is tracking the target
-// I've found, I ignore it. 
+//When one of the agents tells me he is tracking the target
+//I've found, I ignore it. 
 +alreadyTracking(X,Y,V,_)[source(S)]
     :   numberOfAgents(N) &
         .findall(Ag, alreadyTracking(X,Y,_,_)[source(Ag)], ListOfAnswerers) &
@@ -291,10 +280,10 @@ amInterested(X,Y) :-
        // -target(X,Y)[source(_)];
         .abolish(alreadyTracking(X,Y,_,_)).
 
-// If all of the agents tell me they don't know the target at the
-// specified position, I take the task only if my name is lexicographically
-// bigger then the agents interested in that position. (This heuristic
-// lets only one agent take the task) 
+//If all of the agents tell me they don't know the target at the
+//specified position, I take the task only if my name is lexicographically
+//bigger then the agents interested in that position. (This heuristic
+//lets only one agent take the task) 
 +alreadyTracking(X,Y,V,_)[source(S)]
     :   numberOfAgents(N) &
         .findall(Ag, alreadyTracking(X,Y,_,_)[source(Ag)], ListOfAnswerers) &
@@ -303,8 +292,7 @@ amInterested(X,Y) :-
         .findall(I, alreadyTracking(X,Y,_,true)[source(I)], ListOfInterested) &
         .length(ListOfInterested, 0) &      // se nessun altro è interessato
         progressiveNo(Tid) & .my_name(Name)
-    <-//  +tracking(Name, Tid, X, Y);
-        .abolish(target(X, Y)); //TODO
+    <-  .abolish(target(X, Y)); //TODO
         .abolish(alreadyTracking(X,Y,_,_));
         //track(Name, Tid, X, Y); //TODO
         +tracking(Name, Tid, X, Y);
