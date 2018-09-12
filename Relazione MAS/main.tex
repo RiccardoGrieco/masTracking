@@ -8,6 +8,7 @@
 \usepackage{amsthm}		% Per teoremi e dimostrazioni.
 \usepackage{amsmath}
 \usepackage[backend=bibtex, style=numeric, sorting=none, backref]{biblatex}
+\usepackage{tabularx}
 
 
 % --- Custom colors definitions --- %
@@ -53,23 +54,39 @@
 \input{titlePage}
 \newpage
 
+\tableofcontents
+
+\newpage
+
+\section{Introduzione}
+\input{intro}
+
+\newpage
+
 \section{Architettura della Simulazione}
 	\subsection{L'Ambiente}
+	\input{ambiente}
 	\subsection{La Vista}
+	\input{vista}
 	\subsection{Il Modello}
+	\input{modello}
+	
+	\newpage
 
 \section{Agenti \& Targets}
-	\subsection{Comportamento degli Agenti}
-	\subsection{Comportamento dei Targets}
-	\subsection{L'identificazione dei Targets}
+	
 	\subsection{Il Meccanismo d'Asta}
+	\subsection{Comportamento degli Agenti}
+	\input{agenti}
+	\subsection{Comportamento dei Targets}
+	\input{targets}
+	
+	\newpage
 	
 \section{Risultati}
 
 
-\newpage
 
-\tableofcontents
 
 
 \end{document}

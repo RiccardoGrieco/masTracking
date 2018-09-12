@@ -1,0 +1,62 @@
+%		** COMPORTAMENTO DEGLI AGENTI **
+
+
+Ogni agente viene inizializzato per mezzo di una serie di \textit{percepts}, i quali vengono estratti da un file JSON di configurazione. Gli agenti telecamera hanno posizione fissa e una porzione di spazio a loro visibile. Tale area di visione può essere sovrapposta con quella di altri agenti, ma nessuno degli agenti ha informazioni sui parametri degli altri. Fra i percepts iniziali troviamo anche quello riferito al numero di vicini, cioè il numero di agenti con cui può comunicare. Per comodità di utilizzo del framework di simulazione, questi percepts iniziali diventano \textit{mental notes} dell'agente.
+
+Ogni agente, inoltre, tiene memoria di un intero progressivo con il quale etichetta i target che scopre. I target, infatti, vengono identificati dagli agenti attraverso due attributi: nome dell'agente che lo ha scoperto, un numero progressivo che indica il numero di target che quel particolare agente ha scoperto. Si dice che un agente scopre un target quando lo percepisce nella sua area di visione e, dopo aver chiesto ai suoi vicini se stanno tracciando un target in quella posizione, ottiene solo risposte negative.
+
+Il valore della puntata di un'asta viene specificato attraverso la seguente funzione.\\
+Siano $A$ l'agente che deve effettuare la puntata per il target $t_n$, $t$ l'eventuale target che $A$ sta già tracciando, $N_A$ il numero di vicini di $A$, $dist$ una funzione distanza (ad es. la distanza Euclidea) fra un agente ed il target che sta tracciando e $k \in \mathbb{N}$ tale che $k >> dist(A, t)$, allora:
+\begin{center}
+$$
+b(A) =
+\begin{cases} 	
+\frac{(2 \cdot dist(A,t) - dist(A, t_n)) - k}{N_A} & \mbox{se }A \mbox{ sta tracciando }t \\ \\
+\frac{\frac{1}{dist(A,t)} + k}{N_A} & \mbox{ altrimenti.}
+\end{cases} 
+$$
+\end{center}
+La seguente tabella riassume le \textit{belief} degli agenti.
+
+\begin{tabularx}{\textwidth}{| l | X |}
+	\hline
+	\textbf{Belief}						&	\textbf{Descrizione} \\ \hline
+	numberOfAgents(N)					&	Il numero di agenti totali è N. \\ \hline
+	noNeighbor(N)						&	L'agente condivide aree di visione con N altri agenti. \\ \hline
+	myPosition(X,Y)						&	La posizione dell'agente nell'ambiente è (X,Y).\\ \hline
+	canSee(A,B,C,D)						&	L'ambiente può vedere il rettangolo specificato dai punti (A,B) e (C,D). \\ \hline
+	progressiNo(N)						&	Numero progressivo dell'agente per l'etichettature di un nuovo target. \\ \hline
+	losingTarget(Ag,Tid,X,Y)			&	L'agente sta perdendo il target identificato con (Ag,Tid) nella posizione (X,Y). \\ \hline
+	auctionOnGoing(Ag,Tid,X,Y)			&	L'asta per il target (Ag,Tid) che ha bandito l'agente è ancora in corso. \\ \hline
+	numberOfPartecipants(Ag,Tid,N)		&	Il numero di partecipante all'asta per il target (Ag,Tid) è N. \\ \hline
+	partecipate(Ag,Tid,V)[source(S)]	&	V indica se l'agente S partecipa all'asta per il target (Ag,Tid). \\ \hline
+	bid(Ag,Tid,V)[source(S)]			&	V indica la puntata effettuata dall'agente S nell'asta per il target (Ag,Tid). \\ \hline
+	winner(Ag,Tid,X,Y)					&	Indica che l'agente è il vincitore dell'asta per il target (Ag,Tid). \\ \hline
+	target(X,Y)							&	L'agente ha scoperto un nuovo target in posizione (X,Y). \\ \hline
+	tracking(Ag,Tid,X,Y)				&	L'agente sta tracciando il target (Ag,Tid) in posizione (X,Y). \\ \hline
+	alreadyTracking(X,Y,T,I)[source(S)]	&	T indica se l'agente S sta già tracciando il target in posizione (X,Y). I indica se l'agente S è interessato al target in posizione (X,Y). \\ \hline
+\end{tabularx}
+
+La seguente tabella riassume le \textit{regole} degli agenti.
+
+\begin{tabularx}{\textwidth}{|l |X |}
+	\hline
+	\textbf{Regola}		&	\textbf{Descrizione}	\\ \hline
+	amInterested(X,Y)	&	Vero se l'agente è interessato ad un target in posizione (X,Y). \\ \hline
+\end{tabularx}
+
+La seguente tabella riassume i \textit{goal} degli agenti.
+
+\begin{tabularx}{\textwidth}{|l |X |}
+	\hline
+	\textbf{Goal}					&	\textbf{Descrizione}	\\ \hline
+	findWinner(Ag,Tid)				&	Calcola il vincitore di un'asta tra i partecipanti rimanenti. \\ \hline
+	confirm(Ag,Tid,C)[source(S)]	&	In base alla conferma/rifiuto di vittoria dell'agente S, indicata da C, agisce come da protocollo d'asta. \\ \hline
+	clearAuction(Ag,Tid)			&	Elimina i beliefs relativi all'asta per il target (Ag,Tid) dalla belief base dell'agente. \\ \hline
+	cfp(Ag,Tid,X,Y)[source(S)]		&	Dichiara l'intenzione dell'agente di partecipare all'asta per il target (Ag,Tid) in posizione (X,Y). \\ \hline
+	placeBid(Ag,Tid,X,Y)[source(S)]	&	Calcola la puntata per l'asta per il target specificato e la invia al banditore S. \\ \hline
+	tellMeTracking(X,Y)[source(S)]	&	Comunica a S se l'agente sta attualmente tracciando il target in posizione (X,Y). \\ \hline
+\end{tabularx}
+
+
+% perché non askAll o askOne? non posso gestire il caso in cui tutti rispondono negativamente 
