@@ -1,6 +1,6 @@
 MAS masTracking {
     infrastructure: Centralised
-    environment: camera.HouseEnv(nogui,level.txt,rooms.json) // use "nogui" as parameter to not show the GUI
+    environment: camera.HouseEnv(gui,level.txt,rooms.json) // use "nogui" as parameter to not show the GUI
     agents:
         camera agentClass camera.AgentModel #16;
       
