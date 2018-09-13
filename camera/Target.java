@@ -105,7 +105,7 @@ public final class Target{
         id = count++;
 
         //Add reference in the model
-        model.addTarget(this);
+        //model.addTarget(this);
 
         //Choose spawn Position
         position = chooseSpawnPosition();
@@ -126,7 +126,8 @@ public final class Target{
             while (!model.isFree(AgentModel.CAMERA,next) || !model.isFree(TARGET,next)) {
                 try {
                     //Oh I'll be wait here :(
-                    Thread.sleep(1000);
+                    pathIterator = null;
+                    Thread.sleep(1);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

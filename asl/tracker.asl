@@ -54,7 +54,9 @@ amInterested(X,Y) :-
     <- // -losingTarget(Ag, Tid, X, Y);
         //.print("I'm losing my target (",X,",",Y,"), let's start an auction! Target ID: ",Ag,"-",Tid);
         .broadcast(achieve, cfp(Ag, Tid, X, Y));
-        +auctionOngoing(Ag,Tid, X, Y).
+        +auctionOngoing(Ag,Tid, X, Y);
+        //TODO solo per statistiche
+        .print("ASTA").
         //!auction(Ag, Tid, X,Y, <parameters that indicates the chain of auctions>)
 
 //Wait for all agents to tell whether they want to partecipate or not.
@@ -76,14 +78,16 @@ amInterested(X,Y) :-
 //If there are no partecipants in the auction, cancel it.
 +numberOfPartecipants(Ag, Tid, 0)
     :   not winner(_,_,_,_)[source(S)]
-    <-  !clearAuction(Ag, Tid).
+    <-  .print("ASTA FALLITA");
+        !clearAuction(Ag, Tid).
 
 //If there are no partecipants in my auction and I am the winner 
 //of a previous auction, cancel the current and tell the previous
 //auctioneer that I can't confirm my win.
 +numberOfPartecipants(Ag, Tid, 0)
     :   winner(PrevAg, PrevTid, X, Y)[source(S)]
-    <-  !clearAuction(Ag, Tid);
+    <-  .print("ASTA FALLITA");
+        !clearAuction(Ag, Tid);
         -winner(PrevAg, PrevTid, _, _)[source(S)];
         .send(S, achieve, confirm(PrevAg, PrevTid, false)).
 
@@ -144,13 +148,13 @@ amInterested(X,Y) :-
 //to the previous auctioneer. 
 +!confirm(Ag, Tid, Confirmation)[source(S)]
     :   Confirmation=true &
-        winner(PrevAg, PrevTid, X ,Y)[source(S)]
-        & .print("Auction for ",Ag,"-",Tid," has ended2")
+        winner(PrevAg, PrevTid, X ,Y)[source(PrevAuctioneer)]
+        //& .print("Auction for ",Ag,"-",Tid," has ended2")
     <-  +tracking(PrevAg, PrevTid, X, Y);
         !clearAuction(Ag,Tid);
         -winner(PrevAg,PrevTid,_,_)[source(S)];
         -tracking(Ag, Tid, _,_)[source(self)];
-        .send(S, achieve, confirm(PrevAg, PrevTid, true)).
+        .send(PrevAuctioneer, achieve, confirm(PrevAg, PrevTid, true)).
 
 //TODO what if the winner does not confirm?
 
@@ -164,7 +168,7 @@ amInterested(X,Y) :-
 //If the winner of my auction refuses his win and there are no 
 //partecipants left and I am the winner of a previous auction,
 //cancel my auction and refuse the previous win. 
-+!confirm(Ag, Tid, Confirmation) 
++!confirm(Ag, Tid, Confirmation)[source(_)] 
     :   Confirmation=false & .count(bid(Ag,Tid,_),1) &
         winner(PrevAg, PrevTid, _, _)[source(S)]
     <-  !clearAuction(Ag,Tid);
@@ -174,10 +178,11 @@ amInterested(X,Y) :-
 //If the winner of my auction refuses his win and there are no 
 //partecipants left and I'm not the winner of a previous auction,
 //just cancel my auction. 
-+!confirm(Ag, Tid, Confirmation) 
++!confirm(Ag, Tid, Confirmation)[source(_)]
     :   Confirmation=false & .count(bid(Ag,Tid,_),1) &
         not winner(PrevAg, PrevTid, _, _)[source(S)]
-    <-  !clearAuction(Ag,Tid).
+    <-  .print("ASTA FALLITA");
+        !clearAuction(Ag,Tid).
         //TODO implement
         //.print("not implemented yet").
 
@@ -207,7 +212,7 @@ amInterested(X,Y) :-
 //When I'm told I'm the winner and I'm free,
 //confirm the win to the auctioneer.
 +winner(Ag, Tid, X, Y)[source(S)] 
-    :   not tracking(_,_,_,_) //TODO check correctness
+    :   not tracking(_,_,_,_)[source(_)] //TODO check correctness
         //& .print("I'm tracking no one, I confirm my win.") //TODO remove this
     <-  +tracking(Ag, Tid, X, Y);
         .send(S, achieve, confirm(Ag, Tid, true));
@@ -230,6 +235,8 @@ amInterested(X,Y) :-
         not auctionOngoing(TrackedAg,TrackedTid , _, _)
     <-  //.print("I'm the winner but I'm tracking someone. I'll start the auction for ",TrackedAg,"-", TrackedTid);
         +auctionOngoing(TrackedAg,TrackedTid , TrackedX, TrackedY);
+        //TODO solo per statistiche
+        .print("ASTA");
         .broadcast(achieve, cfp(TrackedAg, TrackedTid, TrackedX, TrackedY)).
 
 /*------------------------ A Wild Target Appears ------------------------*/

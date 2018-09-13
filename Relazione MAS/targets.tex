@@ -1,8 +1,8 @@
 %		** COMPORTAMENTO DEI TARGETS **
 
-I targets hanno un comportamento molto semplice: appaiono in maniera casuale nella mappa e si muovono fra le diverse stanze. Lo \textit{spawn} dei target è gestito dall'omonima classe Target, la quale attende un periodo di tempo prefissato prima di far apparire un nuovo target. Nella classe Target viene inoltre specificato il numero massimo di target permessi. Lo spawn è gestito in modo da far apparire i target solo in punti liberi della mappa. Il movimento dei target prevede due fasi distinte:
+I target hanno un comportamento molto semplice: appaiono nella mappa in maniera casuale e si muovono fra le diverse stanze. Lo \textit{spawn} dei target è gestito dall'omonima classe Target, la quale attende un periodo di tempo prefissato prima di farne apparire uno nuovo. Nella classe Target viene inoltre specificato il numero massimo di target previsti per la simulazione. Lo spawn è gestito in modo da far apparire i target solo in punti liberi della mappa. Il movimento dei target prevede due fasi distinte:
 \begin{itemize}
 	\item calcolo della destinazione,
 	\item raggiungimento della destinazione.
 \end{itemize}
-Al primo passo, viene scelto una locazione a caso fra quelle appartenenti alle stanze diverse rispetto a quella in cui si trova attualmente il target, e viene impostata come destinazione. I target raggiungono la loro destinazione un passo alla volta: ogni passo differisce dall'altro di un periodo di tempo prefissato. Una volta raggiunta la destinazione, tale procedimento viene reiterato.
+Al primo passo, viene scelto una locazione a caso fra quelle appartenenti a stanze diverse rispetto a quella in cui si trova attualmente il target: questa viene impostata come destinazione. I target raggiungono la loro destinazione un passo alla volta: ogni passo differisce dall'altro di un periodo di tempo prefissato. Una volta raggiunta la destinazione, tale procedimento viene reiterato all'infinito.

@@ -1,12 +1,30 @@
 %		** COMPORTAMENTO DEGLI AGENTI **
 
 
-Ogni agente viene inizializzato per mezzo di una serie di \textit{percepts}, i quali vengono estratti da un file JSON di configurazione. Gli agenti telecamera hanno posizione fissa e una porzione di spazio a loro visibile. Tale area di visione può essere sovrapposta con quella di altri agenti, ma nessuno degli agenti ha informazioni sui parametri degli altri. Fra i percepts iniziali troviamo anche quello riferito al numero di vicini, cioè il numero di agenti con cui può comunicare. Per comodità di utilizzo del framework di simulazione, questi percepts iniziali diventano \textit{mental notes} dell'agente.
+Ogni agente viene inizializzato per mezzo di una serie di \textit{percept}, i quali vengono estratti da un file JSON di configurazione. Gli agenti telecamera hanno posizione fissa e una porzione di spazio a loro visibile. Tale area di visione può essere sovrapposta con quella di altri agenti, ma nessuno di questi ha informazioni sui parametri degli altri. Fra i percept iniziali troviamo anche quello riferito al numero di vicini, cioè il numero di agenti con cui un particolare agente può comunicare. Per comodità di utilizzo del framework di simulazione, questi percept iniziali vengono trasformati in \textit{mental notes} dell'agente.
 
-Ogni agente, inoltre, tiene memoria di un intero progressivo con il quale etichetta i target che scopre. I target, infatti, vengono identificati dagli agenti attraverso due attributi: nome dell'agente che lo ha scoperto, un numero progressivo che indica il numero di target che quel particolare agente ha scoperto. Si dice che un agente scopre un target quando lo percepisce nella sua area di visione e, dopo aver chiesto ai suoi vicini se stanno tracciando un target in quella posizione, ottiene solo risposte negative.
+Ogni agente, inoltre, tiene memoria di un intero progressivo con il quale etichetta i target che scopre. I target, infatti, vengono identificati dagli agenti attraverso due attributi: nome dell'agente che lo ha scoperto, un numero progressivo che indica il numero di target che quel particolare agente ha scoperto fino a quel momento. Si dice che un agente scopre un target quando lo percepisce nella sua area di visione e, dopo aver chiesto ai suoi vicini se stanno tracciando un target in quella posizione, ottiene solo risposte negative.
 
+\'E stata prevista una sola regola per gli agenti: amInterested(X,Y), la quale è vera se l'agente è interessato ad un target in posizione (X,Y).\\ \\
+
+La seguente tabella riassume i \textit{goal} degli agenti.
+
+\begin{center}
+\begin{tabularx}{\textwidth}{|l |X |}
+	\hline
+	\textbf{Goal}					&	\textbf{Descrizione}	\\ \hline
+	findWinner(Ag,Tid)				&	Calcola il vincitore di un'asta tra i partecipanti rimanenti. \\ \hline
+	confirm(Ag,Tid,C)[source(S)]	&	In base alla conferma/rifiuto di vittoria dell'agente S, indicata da C, agisce come da protocollo d'asta. \\ \hline
+	clearAuction(Ag,Tid)			&	Elimina i beliefs relativi all'asta per il target (Ag,Tid) dalla belief base dell'agente. \\ \hline
+	cfp(Ag,Tid,X,Y)[source(S)]		&	Dichiara l'intenzione dell'agente di partecipare all'asta per il target (Ag,Tid) in posizione (X,Y). \\ \hline
+	placeBid(Ag,Tid,X,Y)[source(S)]	&	Calcola la puntata per l'asta per il target specificato e la invia al banditore S. \\ \hline
+	tellMeTracking(X,Y)[source(S)]	&	Comunica a S se l'agente sta attualmente tracciando il target in posizione (X,Y). \\ \hline
+\end{tabularx}
+\end{center}
+
+\newpage
 La seguente tabella riassume le \textit{belief} degli agenti.
-
+\begin{center}
 \begin{tabularx}{\textwidth}{| l | X |}
 	\hline
 	\textbf{Belief}						&	\textbf{Descrizione} \\ \hline
@@ -25,27 +43,6 @@ La seguente tabella riassume le \textit{belief} degli agenti.
 	tracking(Ag,Tid,X,Y)				&	L'agente sta tracciando il target (Ag,Tid) in posizione (X,Y). \\ \hline
 	alreadyTracking(X,Y,T,I)[source(S)]	&	T indica se l'agente S sta già tracciando il target in posizione (X,Y). I indica se l'agente S è interessato al target in posizione (X,Y). \\ \hline
 \end{tabularx}
-
-La seguente tabella riassume le \textit{regole} degli agenti.
-
-\begin{tabularx}{\textwidth}{|l |X |}
-	\hline
-	\textbf{Regola}		&	\textbf{Descrizione}	\\ \hline
-	amInterested(X,Y)	&	Vero se l'agente è interessato ad un target in posizione (X,Y). \\ \hline
-\end{tabularx}
-
-La seguente tabella riassume i \textit{goal} degli agenti.
-
-\begin{tabularx}{\textwidth}{|l |X |}
-	\hline
-	\textbf{Goal}					&	\textbf{Descrizione}	\\ \hline
-	findWinner(Ag,Tid)				&	Calcola il vincitore di un'asta tra i partecipanti rimanenti. \\ \hline
-	confirm(Ag,Tid,C)[source(S)]	&	In base alla conferma/rifiuto di vittoria dell'agente S, indicata da C, agisce come da protocollo d'asta. \\ \hline
-	clearAuction(Ag,Tid)			&	Elimina i beliefs relativi all'asta per il target (Ag,Tid) dalla belief base dell'agente. \\ \hline
-	cfp(Ag,Tid,X,Y)[source(S)]		&	Dichiara l'intenzione dell'agente di partecipare all'asta per il target (Ag,Tid) in posizione (X,Y). \\ \hline
-	placeBid(Ag,Tid,X,Y)[source(S)]	&	Calcola la puntata per l'asta per il target specificato e la invia al banditore S. \\ \hline
-	tellMeTracking(X,Y)[source(S)]	&	Comunica a S se l'agente sta attualmente tracciando il target in posizione (X,Y). \\ \hline
-\end{tabularx}
-
+\end{center}
 
 % perché non askAll o askOne? non posso gestire il caso in cui tutti rispondono negativamente 

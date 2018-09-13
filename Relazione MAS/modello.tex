@@ -1,8 +1,8 @@
 Il modello, rappresentato dalla classe \textit{HouseModel} rappresenta il collante tra l'environment e la vista. Infatti contiene i riferimenti di ogni target, agente e degli ostacoli presenti all'interno dell'ambiente simulato. 
 I compiti preliminari dell'ambiente sono:
 \begin{itemize}
-	\item Caricare da file la descrizione dell'ambiente e in particolare numero e composizione delle stanze
-	\item Istanziare ad intervalli regolari un nuovo target fino al raggiungimento del limite massimo specificato
-	\item Costruire il grafo delle posizioni calpestabili dai target e fornirne un iteratore
+	\item caricare da file la descrizione dell'ambiente e in particolare numero e composizione delle stanze
+	\item istanziare ad intervalli regolari un nuovo target fino al raggiungimento del limite massimo specificato
+	\item costruire il grafo delle posizioni calpestabili dai target e fornirne un iteratore
 \end{itemize}
 Inoltre il model provvede a riempire e aggiornare una matrice di interi che rappresenta la griglia delle posizioni degli oggetti all'interno dell'ambiente utilizzata dalla view per l'aggiornamento del Canvas e informa l'environment della presenza di nuovi target.

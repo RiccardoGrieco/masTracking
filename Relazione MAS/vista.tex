@@ -1,10 +1,3 @@
-La vista dell'applicativo è rappresentata dalla classe \textit{HouseView} che estende GridWorldView. Quest'ultima, definita all'interno del package java associato a Jason, prevede che l'environment  e dunque lo spazio di simulazione sia discretizzato attraverso una griglia di posizioni. In particolare permette di disegnare in una griglia di posizioni attraverso \textit{l'override} del metodo \texttt{public void draw(Graphics g, int x, int y, int object)} di parametri:
+La vista dell'applicazione è rappresentata dalla classe \textit{HouseView} che estende GridWorldView. Quest'ultima, definita all'interno del package java associato a Jason, prevede che l'ambiente, dunque lo spazio di simulazione, sia discretizzato attraverso una griglia di posizioni. In particolare permette di disegnare in una griglia di posizioni attraverso l'override del metodo \texttt{public void draw(Graphics g, int x, int y, int object)}.
 
-
-\begin{itemize}
-	\item \textit{Graphics g}: riferimento all'area del Canvas da disegnare
-	\item \textit{int x}: ascissa dell'area g. È utilizzata insieme alla lunghezza di ogni area per definire quanta porzione di g disegnare orizzontalmente
-	\item \textit{int y}: ordinata dell'area g. È utilizzata insieme all'altezza di ogni area per definire quanta porzione di g disegnare verticalmente
-	\item \textit{int object}: Specifica la tipologia dell'oggetto da disegnare. L'idea è quella utilizzare uno switch su object per individuare la giusta texture da disegnare
-\end{itemize}
-L'implementazione standard di Jason prevede ad ogni cambiamento di posizione di ridisegnare l`intera area Canvas: per evitare fastidiosi flickering dovuti a spostamenti continui dei target si è scelto di avere memoria delle vecchie posizioni occupate e ridisegnare unicamente l'area precedente e la nuova.
+L'implementazione standard di Jason prevede ad ogni cambiamento di posizione di ridisegnare l'intera area Canvas: per evitare fastidiosi flickering dovuti a spostamenti continui dei target si è scelto di avere memoria delle vecchie posizioni occupate e ridisegnare unicamente l'area precedente e la nuova.

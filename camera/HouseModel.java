@@ -43,7 +43,7 @@ public class HouseModel extends GridWorldModel{
     KShortestSimplePaths<Location,DefaultEdge> builderPaths;
 
     //Maximum Target number
-    private static final int MAX_TARGET = 5;        //TODO TO CHANGE!
+    private static final int MAX_TARGET = 3;        //TODO TO CHANGE!
 
     //Target and Agent  List useful for the environment
     private final List<Target> targets = new ArrayList<>();

@@ -2,18 +2,19 @@
 
 Le aste rappresentano l'elemento fondamentale dell'interazione fra gli agenti. Tramite le aste, gli agenti possono cedere e acquisire nuovi target da tracciare. Ci sono due momenti in cui un agente può bandire un'asta:
 \begin{itemize}
-	\item quando un target attualmente tracciato è in procinto di abbandonare la sua area di visione
+	\item quando un target attualmente tracciato è in procinto di abbandonare la sua area di visione; in tal caso diremo che lo sta perdendo
 	\item quando, dopo aver ricevuto notifica sulla vincita di un'asta precedente, cerca di cedere il target che già sta tracciando.
 \end{itemize}
 Il protocollo d'asta implementato prevede l'utilizzo di aste \textit{First-Price Sealed-Bid}: un tipo d'asta \textit{one-shot} a busta chiusa. 
 
-Il valore della puntata di un'asta viene specificato attraverso la seguente funzione, la quale è implementata attraverso l'azione interna \textit{calculateBid}.\\
-Siano $A$ l'agente che deve effettuare la puntata per il target $t_n$, $t$ l'eventuale target che $A$ sta già tracciando, $N_A$ il numero di vicini di $A$, $dist$ una funzione distanza (ad es. la distanza Euclidea) fra un agente ed il target che sta tracciando e $k \in \mathbb{N}$ tale che $k \gg dist(A, t)$, allora:
+Il valore della puntata di un'asta viene specificato attraverso la seguente funzione, la quale è implementata attraverso l'azione interna \textit{calculateBid}.
+
+Siano $A$ l'agente che deve effettuare la puntata per il nuovo target $t_n$, $t$ l'eventuale target che $A$ sta già tracciando, $N_A$ il numero di vicini di $A$, $dist$ una funzione distanza (ad es. distanza Euclidea) fra un agente ed il target che sta tracciando e $k \in \mathbb{N}$ tale che $k \gg \max dist(A, t)$, allora:
 \begin{center}
 	$$
 	b(A) =
 	\begin{cases} 	
-	\frac{(2 \cdot dist(A,t) - dist(A, t_n)) - k}{N_A} & \mbox{se }A \mbox{ sta tracciando }t \\ \\
+	\frac{(2 dist(A,t) - dist(A, t_n)) - k}{N_A} & \mbox{se }A \mbox{ sta tracciando }t \\ \\
 	\frac{dist(A,t)^{-1} + k}{N_A} & \mbox{ altrimenti.}
 	\end{cases} 
 	$$
@@ -22,11 +23,16 @@ La funzione così definita soddisfa i seguenti vincoli:
 \begin{itemize}
 	\item gli agenti "liberi" vincono sempre sugli agenti "occupati"
 	\item fra agenti "liberi" vince sempre il più vicino al target
-	\item fra agenti "occupati" vince sempre il più vicino al target con target attualmente tracciato più lontano
+	\item fra agenti "occupati" vince sempre l'agente che ha più vicino il target e contemporaneamente ha il target attualmente tracciato più lontano
 	\item a parità di tutto, vince chi ha meno vicini.
 \end{itemize}
 
 Una tipica interazione fra agenti in un contesto d'asta è rappresentata dal seguente \textit{sequence diagram}.
 
-%TODO inserire sequence dell'asta
-
+% Figura sequence diagram
+\begin{figure}[htp]
+	\centering
+	\includegraphics[width=\linewidth]{Auction}
+	\caption{Protocollo d'asta.}
+	\label{fig:auction}
+\end{figure}
