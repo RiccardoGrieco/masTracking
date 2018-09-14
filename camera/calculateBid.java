@@ -76,7 +76,7 @@ public class calculateBid extends DefaultInternalAction {
                 //If agent is free
                 if(itLiteral == null) {
                     dist = euclideanDistance(agentXCoord, agentYCoord, targetXCoord.solve(), targetYCoord.solve());
-                    cost = ((1/dist) + K) / noNeighbors;
+                    cost = (((1/dist)) / noNeighbors) + K;
                 }
                 else {
                     tmpLiteral = itLiteral.next();
@@ -92,7 +92,7 @@ public class calculateBid extends DefaultInternalAction {
 
                     dist = euclideanDistance(agentXCoord, agentYCoord, trackedXCoord, trackedYCoord);
                     dist2 = euclideanDistance(agentXCoord, agentYCoord, targetXCoord.solve(), targetYCoord.solve());
-                    cost = ((2 * dist) - dist2 - K) / noNeighbors;
+                    cost = (((2 * dist) - dist2) / noNeighbors) - K;
                 }
             }
             else {

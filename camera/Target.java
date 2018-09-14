@@ -123,15 +123,15 @@ public final class Target{
             Location next = pathIterator.next();
 
             //No space for me in the next area
-            while (!model.isFree(AgentModel.CAMERA,next) || !model.isFree(TARGET,next)) {
+            /*while (!model.isFree(AgentModel.CAMERA,next) || !model.isFree(TARGET,next)) {
                 try {
                     //Oh I'll be wait here :(
                     pathIterator = null;
-                    Thread.sleep(1);
+                    Thread.sleep(1000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-            }
+            }*/
             
             //Please inform View to redraw 
             model.updateTarget(position, next);

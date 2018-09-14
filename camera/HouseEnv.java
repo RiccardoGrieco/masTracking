@@ -250,7 +250,6 @@ public final class HouseEnv extends Environment {
             if(tracker != null) {
                 
                 if(target.getIdAgent()==null){
-                    //System.out.println("BOOOOOH");//TODO togliere
                     addPercept(tracker.getName(), 
                                 Literal.parseLiteral("lost"));
                     continue;
@@ -307,11 +306,10 @@ public final class HouseEnv extends Environment {
         }
 
         //System.out.println("Mappa dei tracciamenti:");
-        //TODO lo tolho per le per statistiche
-        /*for(AgentModel a : model.getAgentsTrackingMap().keySet()) {
+        for(AgentModel a : model.getAgentsTrackingMap().keySet()) {
             System.out.println(String.format("Agente %s traccia target %s.", a, model.getAgentsTrackingMap().get(a)));
         }
-        System.out.println("");*/
+        System.out.println("");
         Target.BLOCK_LIST.clear();
     }
 
@@ -370,8 +368,6 @@ public final class HouseEnv extends Environment {
 
                             agentToTracked.put(ag, target);
                             trackedToAgent.put(target, ag);
-                            //TODO solo per statistiche
-                            freeTargets.remove(target);
                             
                             if(ag.getViewZone().contains(new Point(target.getPosition().x, 
                                                                     target.getPosition().y)) || 
@@ -389,16 +385,10 @@ public final class HouseEnv extends Environment {
             }
             //System.out.println("Mappa " + trackedToAgent.toString());
         }
-
-        //TODO solo per statistiche
-        if(freeTargets.size() != 0) 
-            System.out.println("target liberi: " + 
-                                freeTargets.size() + 
-                                freeTargets);
     }
 
     private Map<AgentModel, Long> losing = new HashMap<>();
-    private static final long DELTA_TIME_LOSING = 500; //TODO set it properly!
+    private static final long DELTA_TIME_LOSING = 500;
 
     /**
      * Serve to manage the literal 'loosingTraget'.
