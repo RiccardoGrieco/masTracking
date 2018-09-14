@@ -1,8 +1,8 @@
-L'ambiente di simulazione, rappresentato dalla classe \textit{HouseEnv}, costituisce il fulcro dell'applicazione: i metodi di questa classe permettono di inizializzare le belief base degli agenti e di far percepire agli agenti gli spostamenti dei target.
+L'ambiente di simulazione, rappresentato dalla classe \textit{HouseEnv}, costituisce il fulcro dell'applicazione: i metodi di questa classe permettono di inizializzare le belief base degli agenti e di far percepire a questi gli spostamenti dei target.
 Nel dettaglio permette di:
 \begin{itemize}
 \item caricare da file la posizione di ogni agente inizializzando la rispettiva classe java e belief base
-\item stabilire per ogni agente l'area di visione e il numero di agenti che condividono una parte dell'area di visione
+\item stabilire per ogni agente l'area di visione e il numero di agenti che condividono una parte di questa
 \item tenere traccia delle associazioni agente-target tracciato
 \end{itemize}
-L'aggiornamento delle belief base degli agenti è stato implementato attraverso un thread invocato ad ogni spostamento dei target che, dapprima procede ad eliminare ogni percept di ogni agente e, successivamente, definisce, a partire dalla configurazione del model, i nuovi percept da inserire nelle belief base.
+L'aggiornamento delle belief base degli agenti è stato implementato attraverso un thread invocato ad ogni spostamento dei target che, dapprima procede ad eliminare i percept di ogni agente e, successivamente, definisce, a partire dalla configurazione del model, i nuovi percept da inserire nelle belief base.

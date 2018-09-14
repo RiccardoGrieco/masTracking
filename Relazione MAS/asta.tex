@@ -9,13 +9,13 @@ Il protocollo d'asta implementato prevede l'utilizzo di aste \textit{First-Price
 
 Il valore della puntata di un'asta viene specificato attraverso la seguente funzione, la quale è implementata attraverso l'azione interna \textit{calculateBid}.
 
-Siano $A$ l'agente che deve effettuare la puntata per il nuovo target $t_n$, $t$ l'eventuale target che $A$ sta già tracciando, $N_A$ il numero di vicini di $A$, $dist$ una funzione distanza (ad es. distanza Euclidea) fra un agente ed il target che sta tracciando e $k \in \mathbb{N}$ tale che $k \gg \max dist(A, t)$, allora:
+Siano $A$ l'agente che deve effettuare la puntata per il nuovo target $t_n$, $t$ l'eventuale target che $A$ sta già tracciando, $N_A$ il numero di vicini di $A$, $dist$ una funzione distanza (ad es. distanza Euclidea) fra un agente ed un target e $k \in \mathbb{N}$ tale che $k \gg \max dist(A, t)$, allora:
 \begin{center}
 	$$
 	b(A) =
 	\begin{cases} 	
-	\frac{(2 dist(A,t) - dist(A, t_n)) - k}{N_A} & \mbox{se }A \mbox{ sta tracciando }t \\ \\
-	\frac{dist(A,t)^{-1} + k}{N_A} & \mbox{ altrimenti.}
+	\frac{(2 dist(A,t) - dist(A, t_n))}{N_A} - k & \mbox{se }A \mbox{ sta tracciando }t \\ \\
+	\frac{dist(A,t_n)^{-1}}{N_A} + k & \mbox{ altrimenti.}
 	\end{cases} 
 	$$
 \end{center}
@@ -36,3 +36,20 @@ Una tipica interazione fra agenti in un contesto d'asta è rappresentata dal segu
 	\caption{Protocollo d'asta.}
 	\label{fig:auction}
 \end{figure}
+
+\newpage
+
+Il protocollo prevede i seguenti passi.
+\begin{itemize}
+	\item Un agente che vuole cedere il suo target ricopre il ruolo di banditore e invia a tutti gli agenti una \textit{call-for-proposal} per informarli dell'asta.
+	\item Gli agenti che hanno ricevuto la call-for-proposal rispondono al banditore se sono interessati all'asta oppure no.
+	\item Il banditore chiede, solo agli agenti interessati, di fare un offerta.
+	\item Gli agenti interessati calcolano l'offerta e la inviano al banditore.
+	\item Il banditore, dopo aver ricevuto un'offerta da tutti gli agenti interessati, sceglie il vincitore (l'agente che ha fatto l'offerta dal valore più alto) e gli notifica la vincita.
+	\item L'agente vincitore può trovarsi in due stati.
+	\begin{itemize}
+		\item Se è occupato a tracciare un altro target, bandisce un'asta per quest'ultimo e aspetta che questa si concluda; se la sua asta termina con successo, conferma la sua vincita al banditore, altrimenti rigetta la vincita.
+		\item Se è libero, conferma semplicemente la vincita al banditore.
+	\end{itemize}
+	\item Il banditore, se ha avuto una conferma dal vincitore, gli affida il target; altrimenti, ricalcola il vincitore fra gli altri candidati; se non esistono altri agenti di questo tipo, allora l'asta fallisce ed il banditore non può affidare a nessuno il suo target.
+\end{itemize}

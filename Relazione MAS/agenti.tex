@@ -7,32 +7,16 @@ Ogni agente, inoltre, tiene memoria di un intero progressivo con il quale etiche
 
 \'E stata prevista una sola regola per gli agenti: amInterested(X,Y), la quale è vera se l'agente è interessato ad un target in posizione (X,Y).\\ \\
 
-La seguente tabella riassume i \textit{goal} degli agenti.
-
-\begin{center}
-\begin{tabularx}{\textwidth}{|l |X |}
-	\hline
-	\textbf{Goal}					&	\textbf{Descrizione}	\\ \hline
-	findWinner(Ag,Tid)				&	Calcola il vincitore di un'asta tra i partecipanti rimanenti. \\ \hline
-	confirm(Ag,Tid,C)[source(S)]	&	In base alla conferma/rifiuto di vittoria dell'agente S, indicata da C, agisce come da protocollo d'asta. \\ \hline
-	clearAuction(Ag,Tid)			&	Elimina i beliefs relativi all'asta per il target (Ag,Tid) dalla belief base dell'agente. \\ \hline
-	cfp(Ag,Tid,X,Y)[source(S)]		&	Dichiara l'intenzione dell'agente di partecipare all'asta per il target (Ag,Tid) in posizione (X,Y). \\ \hline
-	placeBid(Ag,Tid,X,Y)[source(S)]	&	Calcola la puntata per l'asta per il target specificato e la invia al banditore S. \\ \hline
-	tellMeTracking(X,Y)[source(S)]	&	Comunica a S se l'agente sta attualmente tracciando il target in posizione (X,Y). \\ \hline
-\end{tabularx}
-\end{center}
-
-\newpage
 La seguente tabella riassume le \textit{belief} degli agenti.
 \begin{center}
 \begin{tabularx}{\textwidth}{| l | X |}
 	\hline
 	\textbf{Belief}						&	\textbf{Descrizione} \\ \hline
 	numberOfAgents(N)					&	Il numero di agenti totali è N. \\ \hline
-	noNeighbor(N)						&	L'agente condivide aree di visione con N altri agenti. \\ \hline
+	noNeighbors(N)						&	L'agente condivide aree di visione con N altri agenti. \\ \hline
 	myPosition(X,Y)						&	La posizione dell'agente nell'ambiente è (X,Y).\\ \hline
 	canSee(A,B,C,D)						&	L'ambiente può vedere il rettangolo specificato dai punti (A,B) e (C,D). \\ \hline
-	progressiNo(N)						&	Numero progressivo dell'agente per l'etichettature di un nuovo target. \\ \hline
+	progressiNo(N)						&	Numero progressivo dell'agente per l'etichettatura di un nuovo target. \\ \hline
 	losingTarget(Ag,Tid,X,Y)			&	L'agente sta perdendo il target identificato con (Ag,Tid) nella posizione (X,Y). \\ \hline
 	auctionOnGoing(Ag,Tid,X,Y)			&	L'asta per il target (Ag,Tid) che ha bandito l'agente è ancora in corso. \\ \hline
 	numberOfPartecipants(Ag,Tid,N)		&	Il numero di partecipante all'asta per il target (Ag,Tid) è N. \\ \hline
@@ -43,6 +27,24 @@ La seguente tabella riassume le \textit{belief} degli agenti.
 	tracking(Ag,Tid,X,Y)				&	L'agente sta tracciando il target (Ag,Tid) in posizione (X,Y). \\ \hline
 	alreadyTracking(X,Y,T,I)[source(S)]	&	T indica se l'agente S sta già tracciando il target in posizione (X,Y). I indica se l'agente S è interessato al target in posizione (X,Y). \\ \hline
 \end{tabularx}
+\end{center}
+
+\newpage
+
+
+La seguente tabella riassume i \textit{goal} degli agenti.
+
+\begin{center}
+	\begin{tabularx}{\textwidth}{|l |X |}
+		\hline
+		\textbf{Goal}					&	\textbf{Descrizione}	\\ \hline
+		findWinner(Ag,Tid)				&	Calcola il vincitore di un'asta tra i partecipanti rimanenti. \\ \hline
+		confirm(Ag,Tid,C)[source(S)]	&	In base alla conferma/rifiuto di vittoria dell'agente S, indicata da C, agisce come da protocollo d'asta. \\ \hline
+		clearAuction(Ag,Tid)			&	Elimina i beliefs relativi all'asta per il target (Ag,Tid) dalla belief base dell'agente. \\ \hline
+		cfp(Ag,Tid,X,Y)[source(S)]		&	Dichiara l'intenzione dell'agente di partecipare all'asta per il target (Ag,Tid) in posizione (X,Y). \\ \hline
+		placeBid(Ag,Tid,X,Y)[source(S)]	&	Calcola la puntata per l'asta per il target specificato e la invia al banditore S. \\ \hline
+		tellMeTracking(X,Y)[source(S)]	&	Comunica a S se l'agente sta attualmente tracciando il target in posizione (X,Y). \\ \hline
+	\end{tabularx}
 \end{center}
 
 % perché non askAll o askOne? non posso gestire il caso in cui tutti rispondono negativamente 
